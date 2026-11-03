@@ -19,6 +19,13 @@ require_once($CFG->dirroot . '/course/lib.php');
 
 \core\session\manager::set_user(get_admin());
 
+// Deutsche Oberfläche wie an der Schule.
+if (!get_string_manager()->translation_exists('de', false)) {
+    $langimport = new \tool_langimport\controller();
+    $langimport->install_languagepacks(['de']);
+}
+set_config('lang', 'de');
+
 if ($DB->record_exists('course', ['shortname' => 'GOPILOT-LF5'])) {
     cli_writeln('Testdaten existieren bereits.');
     exit(0);

@@ -5,6 +5,7 @@ Frontend für Moodle, das das selbstgesteuerte Lernen von Auszubildenden an beru
 - Fachlicher Kontext und Glossar: [CONTEXT.md](CONTEXT.md)
 - Architekturentscheidungen: [docs/adr/](docs/adr/)
 - Umsetzungsplan: [docs/umsetzungsplan-v1.md](docs/umsetzungsplan-v1.md)
+- Anleitung für Lehrkräfte und Moodle-Administration: [docs/anleitung/lehrkraefte-moodle.md](docs/anleitung/lehrkraefte-moodle.md)
 
 ## Aufbau
 
@@ -35,7 +36,7 @@ deploy/dev/start.sh
 
 Die Zugangsdaten der Testkonten stehen in [deploy/dev/seed.php](deploy/dev/seed.php). Moodle läuft danach auf http://localhost:8000.
 
-Das Plugin ist direkt aus `plugin/local_gopilot` eingehängt. Nach einer Änderung an `version.php` übernimmt ein erneuter Aufruf von `start.sh` das Upgrade.
+Der Moodle-Code liegt im Docker-Volume `gopilot_moodlecode`, weil Dateizugriffe auf das Windows-Laufwerk Moodle stark ausbremsen. `start.sh` kopiert ihn beim ersten Start aus `.dev/moodle` hinein. Das Plugin ist dagegen direkt aus `plugin/local_gopilot` eingehängt. Nach einer Änderung an `version.php` übernimmt ein erneuter Aufruf von `start.sh` das Upgrade.
 
 ```bash
 deploy/dev/stop.sh

@@ -8,7 +8,15 @@ source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 "$COMPOSE" up -d
 "$WORK_DIR/moodle-docker/bin/moodle-docker-wait-for-db"
 
-installed="$("$COMPOSE" exec -T db psql -U moodle -d moodle -tAc     "SELECT 1 FROM m_config WHERE name = 'version'" 2>/dev/null || true)"
+# Moodle-Code ins Volume kopieren: beim ersten Start und nach einem Update von .dev/moodle.
+"$COMPOSE" exec -T webserver sh -c '
+    cmp -s /opt/moodle-src/version.php /var/www/html/version.php &&
+        cmp -s /opt/moodle-src/config.php /var/www/html/config.php && exit 0
+    echo "Kopiere Moodle-Code ins Volume (dauert einige Minuten) ..."
+    cp -a /opt/moodle-src/. /var/www/html/
+'
+
+installed="$("$COMPOSE" exec -T db psql -U moodle -d moodle -tAc "SELECT 1 FROM m_config WHERE name = 'version'" 2>/dev/null | tail -n 1 || true)"  # moodle-docker-compose schreibt vorab einen Hinweis auf stdout
 if [ "$installed" != "1" ]; then
     echo "Installiere Moodle ..."
     "$COMPOSE" exec -T webserver php admin/cli/install_database.php \

@@ -3,7 +3,15 @@
 services:
   webserver:
     volumes:
+      # Moodle-Code aus einem Docker-Volume statt direkt vom Windows-Laufwerk:
+      # Dort kostet jeder Dateizugriff ~10 ms, eine Seite brauchte so ~20 s.
+      # start.sh kopiert den Code aus .dev/moodle hinein.
+      - "moodlecode:/var/www/html"
+      - "${MOODLE_DOCKER_WWWROOT}:/opt/moodle-src:ro"
       # Plugin aus dem Repo direkt in Moodle einhängen.
       - "${GOPILOT_PLUGIN_DIR}:/var/www/html/local/gopilot"
       # Seed-Skript und Hilfsdateien.
       - "${GOPILOT_DEV_DIR}:/opt/gopilot-dev:ro"
+
+volumes:
+  moodlecode:
