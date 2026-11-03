@@ -1,0 +1,9 @@
+# Wird von setup.sh nach .dev/moodle-docker/local.yml kopiert und dort
+# von moodle-docker automatisch eingebunden.
+services:
+  webserver:
+    volumes:
+      # Plugin aus dem Repo direkt in Moodle einhängen.
+      - "${GOPILOT_PLUGIN_DIR}:/var/www/html/local/gopilot"
+      # Seed-Skript und Hilfsdateien.
+      - "${GOPILOT_DEV_DIR}:/opt/gopilot-dev:ro"

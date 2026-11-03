@@ -1,0 +1,13 @@
+# Lokale Entwicklungsumgebung (moodle-docker, Moodle-Quellcode)
+.dev/
+
+# App
+node_modules/
+app/dist/
+app/coverage/
+
+# Editoren / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
