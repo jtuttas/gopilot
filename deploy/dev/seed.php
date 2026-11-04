@@ -2,7 +2,9 @@
 // Testdaten für die lokale GoPilot-Entwicklungsumgebung.
 //
 // Läuft im Webserver-Container: php /opt/gopilot-dev/seed.php
-// Idempotent: Existiert der Testkurs schon, passiert nichts.
+// Idempotent: Existiert der Testkurs schon, werden keine Kurse/Konten angelegt.
+// Die GoPilot-Daten (Unterrichtswochen, Wochenpläne, Reflexionen, Feedback) werden
+// nur angelegt, solange local_gopilot_week leer ist.
 //
 // Testkonten (nur für die lokale Entwicklungsumgebung):
 //   admin       / Admin-Test-123!       (aus start.sh)
@@ -27,7 +29,8 @@ if (!get_string_manager()->translation_exists('de', false)) {
 set_config('lang', 'de');
 
 if ($DB->record_exists('course', ['shortname' => 'GOPILOT-LF5'])) {
-    cli_writeln('Testdaten existieren bereits.');
+    cli_writeln('Testkurse existieren bereits.');
+    gopilot_seed_plugin_data();
     exit(0);
 }
 
@@ -145,3 +148,129 @@ foreach ($done as $i => $count) {
 }
 
 cli_writeln('Testdaten angelegt: 2 Kurse, 1 Lehrkraft, 3 Azubis.');
+gopilot_seed_plugin_data();
+
+/**
+ * GoPilot-Daten anlegen, damit alle Ampelfarben vorkommen (idempotent über local_gopilot_week).
+ *
+ * azubi1: LF5 grün (Plan erfüllt, reflektiert, „sicher“), LF8 gelb (Plan 50 %, Reflexion fehlt, „unsicher“).
+ * azubi2: LF5 rot („komme nicht klar“, Plan 50 %), LF8 rot (2 Schulwochen ohne Reflexion), Feedback-Faden.
+ * azubi3: nichts geplant und reflektiert, viele überfällige Schritte: rot.
+ *
+ * @return void
+ */
+function gopilot_seed_plugin_data(): void {
+    global $DB;
+    if (!$DB->get_manager()->table_exists('local_gopilot_week')) {
+        cli_writeln('Plugin local_gopilot ist nicht installiert, GoPilot-Daten übersprungen.');
+        return;
+    }
+
+    // Web-Push-Schlüssel für die Entwicklung.
+    if (!\local_gopilot\push\sender::is_enabled()) {
+        $keys = \local_gopilot\push\vapid::generate_keys();
+        set_config('vapidpublickey', $keys['publickey'], 'local_gopilot');
+        set_config('vapidprivatekey', $keys['privatekey'], 'local_gopilot');
+        set_config('vapidsubject', 'mailto:admin@example.com', 'local_gopilot');
+        cli_writeln('VAPID-Schlüssel erzeugt.');
+    }
+
+    if ($DB->record_exists('local_gopilot_week', [])) {
+        cli_writeln('GoPilot-Daten existieren bereits.');
+        return;
+    }
+
+    $weeks = '\local_gopilot\local\weeks';
+    $current = $weeks::current();
+    $w = function (int $offset) use ($weeks, $current): string {
+        return $weeks::add($current, $offset);
+    };
+    $lf5 = $DB->get_record('course', ['shortname' => 'GOPILOT-LF5'], '*', MUST_EXIST);
+    $lf8 = $DB->get_record('course', ['shortname' => 'GOPILOT-LF8'], '*', MUST_EXIST);
+    $teacher = $DB->get_record('user', ['username' => 'lehrkraft1'], '*', MUST_EXIST);
+    $users = [];
+    foreach ([1, 2, 3] as $i) {
+        $users[$i] = $DB->get_record('user', ['username' => 'azubi' . $i], '*', MUST_EXIST);
+    }
+
+    // Unterrichtswochen: LF5 die letzten drei Wochen, diese und nächste Woche; LF8 im Wechsel.
+    \local_gopilot\local\courseconfig::save($lf5->id, [$w(-3), $w(-2), $w(-1), $w(0), $w(1)], true, []);
+    \local_gopilot\local\courseconfig::save($lf8->id, [$w(-3), $w(-1), $w(1)], true, []);
+
+    $cms5 = array_values(array_filter(get_fast_modinfo($lf5)->get_cms(), fn($cm) => $cm->modname !== 'label'));
+    $cms8 = array_values(get_fast_modinfo($lf8)->get_cms());
+    $section = function (stdClass $course, int $num) use ($DB): int {
+        return (int)$DB->get_field('course_sections', 'id', ['course' => $course->id, 'section' => $num]);
+    };
+    $now = time();
+
+    $week = function (stdClass $user, string $week, string $goal, string $general) use ($DB, $now): int {
+        return (int)$DB->insert_record('local_gopilot_week', (object)[
+            'userid' => $user->id, 'week' => $week, 'goal' => $goal, 'generalreflection' => $general,
+            'reflectedat' => $general !== '' ? $now - DAYSECS : 0, 'timecreated' => $now, 'timemodified' => $now,
+        ]);
+    };
+    $plan = function (int $weekid, array $items) use ($DB, $now): void {
+        // Items: [cm, completedatclose or null].
+        foreach ($items as $i => [$cm, $done]) {
+            $DB->insert_record('local_gopilot_planitem', (object)[
+                'weekid' => $weekid, 'courseid' => $cm->course, 'cmid' => $cm->id, 'sortorder' => $i,
+                'completedatclose' => $done, 'timecreated' => $now,
+            ]);
+        }
+    };
+    $reflect = function (int $weekid, stdClass $course, string $text) use ($DB, $now): void {
+        $DB->insert_record('local_gopilot_coursereflection', (object)[
+            'weekid' => $weekid, 'courseid' => $course->id, 'text' => $text, 'timecreated' => $now, 'timemodified' => $now,
+        ]);
+    };
+    $assess = function (int $weekid, stdClass $course, int $sectionid, int $level, string $comment) use ($DB, $now): void {
+        $DB->insert_record('local_gopilot_selfassessment', (object)[
+            'weekid' => $weekid, 'courseid' => $course->id, 'sectionid' => $sectionid, 'selflevel' => $level,
+            'remark' => $comment, 'timemodified' => $now,
+        ]);
+    };
+    $feedback = function (int $weekid, stdClass $course, stdClass $author, string $message, int $time) use ($DB): void {
+        $DB->insert_record('local_gopilot_feedback', (object)[
+            'weekid' => $weekid, 'courseid' => $course->id, 'authorid' => $author->id, 'message' => $message,
+            'timecreated' => $time,
+        ]);
+    };
+
+    // Azubi 1.
+    $id = $week($users[1], $w(-3), 'Schuljahr starten', 'Neue Klasse, neue Lernfelder.');
+    $reflect($id, $lf5, 'Lernfeld 5 kennengelernt.');
+    $reflect($id, $lf8, 'HTTP-Grundlagen wiederholt.');
+    $id = $week($users[1], $w(-2), 'LS 5.1 anfangen', 'Guter Einstieg in die Datenbanken.');
+    $reflect($id, $lf5, 'Den Auftrag verstanden und mit dem ER-Modell begonnen.');
+    $assess($id, $lf5, $section($lf5, 1), 2, '');
+    $id = $week($users[1], $w(-1), 'ER-Modell fertigstellen und mit der REST-API starten',
+        'Die Woche lief gut, nur für LF8 blieb wenig Zeit.');
+    $plan($id, [[$cms5[0], 1], [$cms5[1], 1], [$cms5[2], 1], [$cms5[3], 1], [$cms8[0], 1], [$cms8[1], 0]]);
+    $reflect($id, $lf5, 'ER-Modell abgegeben, die Normalisierung hat am längsten gedauert.');
+    $assess($id, $lf5, $section($lf5, 1), 1, '');
+    $reflect($id, $lf8, '');
+    $assess($id, $lf8, $section($lf8, 1), 3, 'Die API-Dokumentation ist schwer zu lesen.');
+    $feedback($id, $lf5, $teacher, 'Starke Woche! Achte bei der Normalisierung auf die 3. Normalform.', $now - 3 * HOURSECS);
+    $id = $week($users[1], $w(0), 'SQL-Grundlagen lernen', '');
+    $plan($id, [[$cms5[4], null], [$cms5[5], null], [$cms8[1], null]]);
+
+    // Azubi 2.
+    $id = $week($users[2], $w(-1), 'LS 5.1 aufholen', 'Ich war zwei Tage krank.');
+    $plan($id, [[$cms5[0], 1], [$cms5[1], 1], [$cms5[2], 0], [$cms5[3], 0]]);
+    $reflect($id, $lf5, 'Die Normalisierung verstehe ich noch nicht.');
+    $assess($id, $lf5, $section($lf5, 1), 4, 'Normalformen sind mir unklar.');
+    $feedback($id, $lf5, $teacher, 'Melde dich gern, dann gehen wir die Normalisierung zusammen durch.',
+        $now - 2 * HOURSECS);
+    $feedback($id, $lf5, $users[2], 'Danke, ich komme am Mittwoch vorbei.', $now - HOURSECS);
+
+    // Ampeln einmal berechnen, damit die Lerndoku sofort Werte hat.
+    $calculator = new \local_gopilot\ampel\calculator();
+    foreach ($users as $user) {
+        foreach ([$lf5, $lf8] as $course) {
+            $result = $calculator->compute_and_store($user->id, $course->id);
+            cli_writeln("Ampel {$user->username} {$course->shortname}: {$result['colour']}");
+        }
+    }
+    cli_writeln('GoPilot-Daten angelegt.');
+}

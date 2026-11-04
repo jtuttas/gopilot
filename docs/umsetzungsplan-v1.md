@@ -2,6 +2,8 @@
 
 Stand: 2026-11-03. Grundlage sind [CONTEXT.md](../CONTEXT.md) und die ADRs 0001–0007. Begriffe werden wie im Glossar verwendet.
 
+> **Umsetzungsstand:** M0 bis M7 sind umgesetzt. Die verbindliche Schnittstelle steht in [api-v1.md](api-v1.md). Abweichungen vom Plan: Das Plugin braucht Moodle 4.2 oder neuer; Web-Push ist ohne `minishlink/web-push` direkt mit OpenSSL umgesetzt (VAPID ES256, aes128gcm nach RFC 8291); die UI-Bibliothek ist Mantine 7. Offen ist M8 (Pilot) und ein Test des Push-Versands an echte Geräte.
+
 ## 1. Überblick
 
 GoPilot besteht aus zwei Artefakten in einem Repository:
@@ -164,4 +166,4 @@ M1 ist bewusst ein schmaler Durchstich durch alle Schichten (Login, Webservice, 
 
 1. Moodle-Version und Anmeldeart der Ziel-Instanz prüfen.
 2. An der Zielinstanz prüfen, dass `login/token.php` genau einen `Access-Control-Allow-Origin`-Header liefert (ADR 0007).
-3. UI-Bibliothek wählen (Mantine oder shadcn/ui).
+3. ~~UI-Bibliothek wählen (Mantine oder shadcn/ui).~~ Entschieden: Mantine 7.

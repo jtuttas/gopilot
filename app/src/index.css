@@ -1,17 +1,9 @@
-:root {
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
-  color: #1f2933;
-  background: #f7f8fa;
+html,
+body {
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-main {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem;
-}
-
-.hint {
-  color: #616e7c;
-  font-size: 0.875rem;
+body {
+  overscroll-behavior-y: none;
 }

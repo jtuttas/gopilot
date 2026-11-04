@@ -1,0 +1,72 @@
+name: App auf GitHub Pages
+
+# Baut die PWA und veröffentlicht sie unter https://<owner>.github.io/<repo>/.
+# Ist die Repository-Variable MOODLE_URL gesetzt (Settings → Secrets and variables → Actions → Variables),
+# spricht die App mit dieser Moodle-Instanz. Sonst läuft sie im Demo-Modus mit Beispieldaten.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+
+      - name: App bauen
+        run: |
+          if [ -n "$MOODLE_URL" ]; then
+            echo "Moodle: $MOODLE_URL"
+            export VITE_MOODLE_URL="$MOODLE_URL"
+          else
+            echo "Keine Repository-Variable MOODLE_URL gesetzt: Demo-Modus mit Beispieldaten."
+            export VITE_MOCK=1
+          fi
+          # --base: die App liegt unter /<repo>/, nicht an der Domain-Wurzel.
+          npm run build -- --base "$BASE_PATH"
+          # GitHub Pages kennt keinen SPA-Fallback: unbekannte Pfade liefern 404.html.
+          cp dist/index.html dist/404.html
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+          MOODLE_URL: ${{ vars.MOODLE_URL }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

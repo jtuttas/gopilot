@@ -1,0 +1,40 @@
+.brand {
+  color: inherit;
+  text-decoration: none;
+}
+
+.main {
+  background: var(--mantine-color-body);
+}
+
+.footer {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottomNav {
+  display: flex;
+  height: 64px;
+}
+
+.bottomItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+  text-decoration: none;
+}
+
+.bottomItem[data-active] {
+  color: var(--mantine-primary-color-filled);
+  font-weight: 600;
+}
+
+.bottomItem:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: -4px;
+  border-radius: var(--mantine-radius-md);
+}

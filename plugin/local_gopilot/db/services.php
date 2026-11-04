@@ -15,9 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Web service definitions for local_gopilot.
- *
- * Functions are added milestone by milestone (docs/umsetzungsplan-v1.md, section 2.3).
+ * Web service definitions for local_gopilot (docs/api-v1.md).
  *
  * @package    local_gopilot
  * @copyright  2026 Jörg Tuttas
@@ -26,14 +24,41 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$gopilotfunctions = [
+    'get_overview' => ['Courses, current week and own Ampels', 'read'],
+    'get_paths' => ['Learning paths of a course', 'read'],
+    'get_week' => ['One planning week', 'read'],
+    'save_plan' => ['Save weekly goal and planned steps', 'write'],
+    'save_reflection' => ['Save the reflection of a week', 'write'],
+    'get_biography' => ['Learning biography', 'read'],
+    'get_lerndoku' => ['Learners of a course with Ampel (coach)', 'read'],
+    'get_learner' => ['Weeks of a learner in a course (coach)', 'read'],
+    'add_feedback' => ['Add coaching feedback', 'write'],
+    'get_courseconfig' => ['Course configuration', 'read'],
+    'save_courseconfig' => ['Save course configuration', 'write'],
+    'save_pathmeta' => ['Save path metadata', 'write'],
+    'get_push_config' => ['Web Push configuration', 'read'],
+    'register_push' => ['Register a Web Push subscription', 'write'],
+    'unregister_push' => ['Remove a Web Push subscription', 'write'],
+];
+
 $functions = [];
+foreach ($gopilotfunctions as $name => [$description, $type]) {
+    $functions['local_gopilot_' . $name] = [
+        'classname' => 'local_gopilot\\external\\' . $name,
+        'description' => $description,
+        'type' => $type,
+        'ajax' => true,
+    ];
+}
 
 $services = [
     'GoPilot' => [
         'shortname' => 'gopilot',
-        'functions' => [
+        'functions' => array_merge(array_keys($functions), [
             'core_webservice_get_site_info',
-        ],
+            'core_completion_update_activity_completion_status_manually',
+        ]),
         'enabled' => 1,
         'restrictedusers' => 0,
         'downloadfiles' => 0,

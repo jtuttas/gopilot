@@ -26,7 +26,6 @@ namespace local_gopilot;
  * @coversNothing
  */
 final class install_test extends \advanced_testcase {
-
     /**
      * The three GoPilot capabilities are installed.
      */

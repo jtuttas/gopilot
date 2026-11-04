@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_gopilot';
-$plugin->version   = 2026110300;
-$plugin->requires  = 2022112800; // Moodle 4.1 LTS.
+$plugin->version   = 2026110401;
+$plugin->requires  = 2023042400; // Moodle 4.2 (core_external namespace).
 $plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '0.1.0';
+$plugin->release   = '0.2.0';

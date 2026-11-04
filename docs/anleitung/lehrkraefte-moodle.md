@@ -173,6 +173,16 @@ Damit sich Lernende und Lehrkräfte mit ihrem Moodle-Benutzernamen und Kennwort 
 
 Die Anmeldung läuft über `login/token.php`. SSO-Anmeldungen (z. B. über einen Identitätsanbieter) werden in Version 1 nicht unterstützt. Betroffene Konten brauchen ein Moodle-Kennwort.
 
+### Benachrichtigungen und Push
+
+GoPilot benachrichtigt über die üblichen Moodle-Kanäle: neues Coaching-Feedback, neue Reflexion, Reflexion fällig, Ampelwechsel. Damit die Nachrichten zusätzlich als Push auf dem Handy ankommen, einmalig auf dem Moodle-Server die Schlüssel erzeugen:
+
+```
+php local/gopilot/cli/generate_vapid.php
+```
+
+Unter **Website-Administration → Plugins → Lokale Plugins → GoPilot** die Adresse der App eintragen. Dann verlinken Moodle-Nachrichten, z. B. per E-Mail, direkt in die App.
+
 ### Zugriff von der App-Domain (CORS)
 
 GoPilot läuft auf einer eigenen Domain und ruft Moodle direkt aus dem Browser auf. Moodle erlaubt das an `login/token.php` und `webservice/rest/server.php` von sich aus. **Am Webserver ist keine CORS-Konfiguration nötig.** Setzen Sie für diese beiden Adressen auch keine eigenen `Access-Control-Allow-Origin`-Header: Doppelte Header führen dazu, dass der Browser die Antworten verwirft (siehe [ADR 0007](../adr/0007-app-auf-eigener-domain.md)).
