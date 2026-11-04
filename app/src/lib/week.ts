@@ -102,23 +102,6 @@ export function formatDateTime(unix: number): string {
   return `${formatDate(unix)}, ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-/** First year of the school year (Aug–Jul) that contains `d`. */
-export function schoolYearOf(d: Date = new Date()): number {
-  return d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1
-}
-
-/**
- * All Mondays of weeks that overlap the school year starting 1 August
- * `startYear` and ending 31 July `startYear + 1`.
- */
-export function schoolYearWeeks(startYear: number): string[] {
-  const first = mondayOf(new Date(startYear, 7, 1))
-  const last = Date.UTC(startYear + 1, 6, 31)
-  const weeks: string[] = []
-  for (let w = first; parseUtc(w) <= last; w = addWeeks(w, 1)) weeks.push(w)
-  return weeks
-}
-
 /** Relation of a week to the current week, for labels. */
 export function relativeWeekLabel(week: string, current: string): string {
   const diff = Math.round((parseUtc(week) - parseUtc(current)) / (7 * DAY_MS))

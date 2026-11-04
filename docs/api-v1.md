@@ -50,7 +50,7 @@ Nur sichtbare, für die Person verfügbare Kursmodule, ohne Textfelder (`label`)
 | `timecomputed` | int | |
 | `signals` | list of `signal` | immer alle vier, in der Reihenfolge `plan`, `backlog`, `reflection`, `selfassessment` |
 
-`signal`: `key` (string, s. o.), `active` (bool, ob das Signal auswertbar ist), `colour` (`green`/`yellow`/`red`/`none`), `value` (int, Rohwert: Prozent, Anzahl überfälliger Schritte, Anzahl Wochen, Stufe 1–4; 0 wenn inaktiv), `reason` (string, deutscher Begründungstext für die Anzeige, z. B. „2 von 6 geplanten Lernschritten erledigt (33 %)“, bei inaktiv z. B. „Keine Schulwoche“).
+`signal`: `key` (string, s. o.), `active` (bool, ob das Signal auswertbar ist), `colour` (`green`/`yellow`/`red`/`none`), `value` (int, Rohwert: Prozent, Anzahl überfälliger Schritte, Anzahl Wochen, Stufe 1–4; 0 wenn inaktiv), `reason` (string, deutscher Begründungstext für die Anzeige, z. B. „2 von 6 geplanten Lernschritten erledigt (33 %)“, bei inaktiv z. B. „Kein Lernschritt dieses Kurses geplant“).
 
 ### `feedbackentry`
 
@@ -66,7 +66,6 @@ Nur sichtbare, für die Person verfügbare Kursmodule, ohne Textfelder (`label`)
 |---|---|---|
 | `courseid` | int | |
 | `fullname` | string | |
-| `isschoolweek` | bool | Woche ist Unterrichtswoche dieses Kurses |
 | `reflection` | string | Kursreflexion, leer = keine |
 | `selfassessments` | list of `selfassessment` | für jeden Lernpfad mit geplanten Schritten dieser Woche ein Eintrag (auch wenn `level` 0) |
 | `feedback` | list of `feedbackentry` | Faden zu dieser Woche und diesem Kurs, älteste zuerst |
@@ -96,7 +95,7 @@ Rückgabe:
 | `userid` | int |
 | `fullname` | string |
 | `currentweek` | string (Montag dieser Woche) |
-| `courses` | list: `id`, `shortname`, `fullname`, `canuse` bool, `cancoach` bool, `canconfigure` bool, `isschoolweek` bool (aktuelle Woche), `progress` (`completed` int, `total` int über alle Lernschritte mit Abschlussbedingung), `ampel` (`ampel`, nur sinnvoll bei `canuse`; sonst `colour` = `none`) |
+| `courses` | list: `id`, `shortname`, `fullname`, `canuse` bool, `cancoach` bool, `canconfigure` bool, `progress` (`completed` int, `total` int über alle Lernschritte mit Abschlussbedingung), `ampel` (`ampel`, nur sinnvoll bei `canuse`; sonst `colour` = `none`) |
 | `week` | `week` (aktuelle Woche) |
 
 Alle Kurse, in denen die Person `use`, `coach` oder `configure` hat. Die Ampel wird beim Aufruf neu berechnet und gespeichert.
@@ -137,7 +136,7 @@ Rückgabe: `total` int (Anzahl Wochen mit Daten), `weeks` list of `week`, neuest
 
 Parameter: `courseid` int.
 
-Rückgabe: `course` (`id`, `fullname`), `currentweek` string, `isschoolweek` bool, `learners` list of:
+Rückgabe: `course` (`id`, `fullname`), `currentweek` string, `learners` list of:
 
 | Feld | Typ |
 |---|---|
@@ -157,7 +156,7 @@ Parameter: `courseid` int, `userid` int.
 
 Rückgabe: `learner` (`id`, `fullname`), `ampel`, `weeks` list of `learnerweek`, neueste zuerst, nur Wochen mit Daten:
 
-`learnerweek`: `week` string, `closed` bool, `isschoolweek` bool, `goal` string, `generalreflection` string, `reflectedat` int, `items` (list of `step`, nur Lernschritte dieses Kurses), `reflection` string, `selfassessments`, `feedback`.
+`learnerweek`: `week` string, `closed` bool, `goal` string, `generalreflection` string, `reflectedat` int, `items` (list of `step`, nur Lernschritte dieses Kurses), `reflection` string, `selfassessments`, `feedback`.
 
 Wochenziel und allgemeine Reflexion sind für jeden Lerncoach eines Kurses der Person lesbar, alles andere nur für diesen Kurs.
 
@@ -178,7 +177,6 @@ Rückgabe:
 | Feld | Typ |
 |---|---|
 | `courseid` | int |
-| `teachingweeks` | list of string (Montage) |
 | `usedefaults` | bool |
 | `thresholds` | `thresholds` (wirksame Werte) |
 | `defaults` | `thresholds` (Standardwerte) |
@@ -188,7 +186,7 @@ Rückgabe:
 
 ### `local_gopilot_save_courseconfig`
 
-Parameter: `courseid` int, `teachingweeks` list of string, `usedefaults` bool, `thresholds` (`thresholds`, wird ignoriert bei `usedefaults`).
+Parameter: `courseid` int, `usedefaults` bool, `thresholds` (`thresholds`, wird ignoriert bei `usedefaults`).
 
 Prüft `planyellow < plangreen`, `backlogyellow < backlogred`, `reflectionyellow < reflectionred`, sonst `invalidthresholds`. Rückgabe wie `get_courseconfig`.
 
@@ -231,9 +229,9 @@ Parameter: `endpoint` string. Rückgabe: `success` bool.
 
 Für `(userid, courseid)` zum Zeitpunkt der Berechnung:
 
-1. **`plan` (Planerfüllung):** Bezugswoche ist die zuletzt abgeschlossene Woche. Aktiv nur, wenn sie eine Schulwoche des Kurses ist **und** die Person darin mindestens einen Lernschritt dieses Kurses geplant hat. Wert = Anteil erledigter geplanter Schritte (erledigt bis Sonntag 23:59:59, also `completedatclose` bzw. `timemodified` des Abschlusses ≤ Wochenende), ganzzahlig gerundet. Grün ab `plangreen`, gelb ab `planyellow`, sonst rot. Begründung „4 von 6 geplanten Lernschritten erledigt (67 %)“. Inaktiv: „Keine Schulwoche“ bzw. „Kein Lernschritt dieses Kurses geplant“.
+1. **`plan` (Planerfüllung):** Bezugswoche ist die zuletzt abgeschlossene Woche. Aktiv, wenn die Person darin mindestens einen Lernschritt dieses Kurses geplant hat. Wert = Anteil erledigter geplanter Schritte (erledigt bis Sonntag 23:59:59, also `completedatclose` bzw. `timemodified` des Abschlusses ≤ Wochenende), ganzzahlig gerundet. Grün ab `plangreen`, gelb ab `planyellow`, sonst rot. Begründung „4 von 6 geplanten Lernschritten erledigt (67 %)“. Inaktiv: „Kein Lernschritt dieses Kurses geplant“.
 2. **`backlog` (Pfadrückstand):** immer aktiv, wenn der Kurs Abschlussverfolgung hat. Wert = Anzahl `overdue`-Lernschritte im Kurs. Gelb ab `backlogyellow`, rot ab `backlogred`. Begründung „3 Lernschritte überfällig“ bzw. „Keine überfälligen Lernschritte“.
-3. **`reflection` (fehlende Reflexion):** aktiv, wenn der Kurs Unterrichtswochen hat und mindestens eine abgeschlossene Schulwoche existiert. Wert = Anzahl der zuletzt abgeschlossenen Schulwochen in Folge (von der neuesten rückwärts) ohne Kursreflexion. Gelb ab `reflectionyellow`, rot ab `reflectionred`. Inaktiv ohne Unterrichtswochen: „Keine Unterrichtswochen hinterlegt“.
+3. **`reflection` (fehlende Reflexion):** Es zählen nur abgeschlossene Wochen, in denen die Person Lernschritte dieses Kurses geplant hat (ADR 0008). Wert = Anzahl dieser Wochen in Folge (von der neuesten rückwärts) ohne Kursreflexion. Gelb ab `reflectionyellow`, rot ab `reflectionred`. Inaktiv ohne solche Woche: „Noch keine abgeschlossene Woche mit geplanten Lernschritten“.
 4. **`selfassessment`:** aktiv, wenn es eine Woche mit Selbsteinschätzung (`level` > 0) in diesem Kurs gibt. Wert = schlechteste Stufe der neuesten solchen Woche. 1–2 grün, 3 gelb, 4 rot. Begründung „Selbsteinschätzung „unsicher“ in LS 5.2 (KW 45)“.
 
 Gesamtfarbe = schlechteste Farbe der aktiven Signale, `none`, wenn keins aktiv ist.
@@ -244,7 +242,7 @@ Gesamtfarbe = schlechteste Farbe der aktiven Signale, `none`, wenn keins aktiv i
 |---|---|---|
 | `feedback` | Lernende:r bzw. Lerncoach | neuer Eintrag im Feedback-Faden |
 | `reflection` | Lerncoaches des Kurses | Lernende:r speichert Kursreflexion (Standard: nur Web) |
-| `reflectiondue` | Lernende:r | geplante Aufgabe freitags 14 Uhr, Schulwoche, noch keine Reflexion |
+| `reflectiondue` | Lernende:r | geplante Aufgabe freitags 14 Uhr, Lernschritte des Kurses in dieser Woche geplant, noch keine Kursreflexion |
 | `ampelchange` | Lernende:r | Ampel eines Kurses wechselt auf Gelb oder Rot |
 
 Jede Nachricht wird zusätzlich als Web-Push an die Abos der Person verschickt (Titel = Betreff, Text = kurze Nachricht, `url` = Pfad in der App). Die App kennt diese Pfade als Routen, auch als Deep-Link:

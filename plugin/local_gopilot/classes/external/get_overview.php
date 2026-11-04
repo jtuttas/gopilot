@@ -25,7 +25,6 @@ use core_external\external_single_structure;
 use core_external\external_value;
 use local_gopilot\ampel\calculator;
 use local_gopilot\local\access;
-use local_gopilot\local\courseconfig;
 use local_gopilot\local\weekdata;
 use local_gopilot\local\weeks;
 
@@ -76,7 +75,6 @@ class get_overview extends external_api {
                 'canuse' => $canuse,
                 'cancoach' => $cancoach,
                 'canconfigure' => $canconfigure,
-                'isschoolweek' => (new courseconfig($course->id))->is_schoolweek($current),
                 'progress' => $data->steps()->progress($course->id, $USER->id),
                 'ampel' => $canuse ? $calculator->compute_and_store($USER->id, $course->id)
                     : calculator::empty_result($course->id),
@@ -108,7 +106,6 @@ class get_overview extends external_api {
                 'canuse' => new external_value(PARAM_BOOL, 'Learner in this course'),
                 'cancoach' => new external_value(PARAM_BOOL, 'Learning coach in this course'),
                 'canconfigure' => new external_value(PARAM_BOOL, 'May configure the course'),
-                'isschoolweek' => new external_value(PARAM_BOOL, 'Current week is a teaching week'),
                 'progress' => structures::progress(),
                 'ampel' => structures::ampel(),
             ])),

@@ -97,7 +97,6 @@ class get_courseconfig extends external_api {
         }
         return [
             'courseid' => $courseid,
-            'teachingweeks' => $config->get_teachingweeks(),
             'usedefaults' => $config->uses_defaults(),
             'thresholds' => $config->get_thresholds(),
             'defaults' => courseconfig::DEFAULTS,
@@ -113,7 +112,6 @@ class get_courseconfig extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'courseid' => new external_value(PARAM_INT, 'Course id'),
-            'teachingweeks' => new external_multiple_structure(new external_value(PARAM_RAW, 'Monday YYYY-MM-DD')),
             'usedefaults' => new external_value(PARAM_BOOL, 'Default thresholds are used'),
             'thresholds' => structures::thresholds(),
             'defaults' => structures::thresholds(),

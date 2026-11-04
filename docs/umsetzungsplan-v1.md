@@ -34,7 +34,7 @@ Die Fachlogik liegt im Plugin, vor allem die Ampel-Berechnung. Die App zeigt an 
 | `local_gopilot_coursereflection` | Kursreflexion | `weekid`, `courseid`, `text` |
 | `local_gopilot_selfassessment` | Selbsteinschätzung pro Lernpfad | `weekid`, `courseid`, `sectionid`, `level` (1 sicher … 4 komme nicht klar), `comment` |
 | `local_gopilot_feedback` | Coaching-Feedback-Faden | `weekid`, `courseid`, `authorid`, `message`, `timecreated` |
-| `local_gopilot_courseconfig` | Kurs-Metadaten | `courseid`, `teachingweeks` (Unterrichtswochen als JSON-Liste von `weekstart`), `thresholds` (JSON, leer = Standardwerte) |
+| `local_gopilot_courseconfig` | Kurs-Metadaten | `courseid`, `teachingweeks` (seit 0.4.0 ungenutzt, ADR 0008), `thresholds` (JSON, leer = Standardwerte) |
 | `local_gopilot_pathmeta` | Pfad-Metadaten | `cmid` bzw. `sectionid`, `phase`, `duration` (Minuten), `level` |
 | `local_gopilot_ampel` | Zuletzt berechnete Förder-Ampel | `userid`, `courseid`, `colour`, `signals` (JSON mit Einzelsignalen und Begründung), `timecomputed` |
 | `local_gopilot_pushsub` | Web-Push-Abos | `userid`, `endpoint`, `p256dh`, `auth`, `timecreated` |
@@ -47,7 +47,7 @@ Die Lerndaten (Abschlüsse, Soll-Termine, Abschnitte) liest das Plugin direkt au
 |---|---|---|---|
 | `local/gopilot:use` | Kurs | student | Lernpfade sehen, planen, reflektieren |
 | `local/gopilot:coach` | Kurs | teacher, editingteacher | Lerndoku, Kursreflexionen lesen, Feedback geben |
-| `local/gopilot:configure` | Kurs | editingteacher | Unterrichtswochen, Schwellwerte, Pfad-Metadaten pflegen |
+| `local/gopilot:configure` | Kurs | editingteacher | Schwellwerte, Pfad-Metadaten pflegen |
 
 Sichtbarkeitsregeln (ADR 0003/0004): Wochenziel und allgemeine Reflexion darf jede Person mit `coach` in *irgendeinem* Kurs der:des Lernenden lesen. Kursreflexion, Selbsteinschätzung, Feedback und Ampel eines Kurses nur mit `coach` in *diesem* Kurs. Lernende sehen nur ihre eigenen Daten.
 
@@ -71,7 +71,7 @@ Sichtbarkeitsregeln (ADR 0003/0004): Wochenziel und allgemeine Reflexion darf je
 | `local_gopilot_get_lerndoku` | Alle Lernenden eines Kurses mit Ampel und Signalen |
 | `local_gopilot_get_learner` | Detailansicht einer:eines Lernenden im Kurs (Wochen, Kursreflexionen, Feedback-Faden) |
 | `local_gopilot_add_feedback` | Coaching-Feedback an einer Kursreflexion |
-| `local_gopilot_get_courseconfig` / `local_gopilot_save_courseconfig` | Unterrichtswochen, Schwellwerte |
+| `local_gopilot_get_courseconfig` / `local_gopilot_save_courseconfig` | Schwellwerte |
 | `local_gopilot_save_pathmeta` | Pfad-Metadaten |
 
 **Beide**
@@ -86,21 +86,21 @@ Dazu kommen aus dem Moodle-Kern: `core_webservice_get_site_info` (eigene Person)
 
 Eine PHP-Klasse `\local_gopilot\ampel\calculator` berechnet für `(userid, courseid)` die vier Signale nach ADR 0003:
 
-1. **Planerfüllung:** nur, wenn die letzte abgeschlossene Planungswoche eine Schulwoche des Kurses ist. Basis sind die geplanten Lernschritte dieses Kurses.
+1. **Planerfüllung:** Basis sind die geplanten Lernschritte dieses Kurses in der letzten abgeschlossenen Planungswoche.
 2. **Pfadrückstand:** Lernschritte des Kurses mit `completionexpected` bzw. Fälligkeitsdatum in der Vergangenheit, die nicht abgeschlossen sind.
-3. **Fehlende Reflexion:** aufeinanderfolgende vergangene Schulwochen ohne Kursreflexion.
+3. **Fehlende Reflexion:** aufeinanderfolgende vergangene Wochen mit geplanten Lernschritten des Kurses, aber ohne Kursreflexion (ADR 0008).
 4. **Selbsteinschätzung:** schlechtester Wert der letzten Reflexion in diesem Kurs.
 
 Gesamtfarbe = schlechtestes Signal. Schwellwerte kommen aus `courseconfig`, ersatzweise aus den Standardwerten. Das Ergebnis enthält zu jedem Signal einen Begründungstext, den die App direkt anzeigen kann (z. B. „2 von 6 geplanten Schritten erledigt“).
 
-Diese Klasse ist der fachlich kritischste Teil und bekommt vollständige PHPUnit-Tests, auch für die Randfälle Betriebswoche, Lernschritt ohne Termin und Kurs ohne Unterrichtswochen.
+Diese Klasse ist der fachlich kritischste Teil und bekommt vollständige PHPUnit-Tests, auch für die Randfälle Woche ohne Plan, Lernschritt ohne Termin und Kurs ohne Einstellungen.
 
 ### 2.5 Hintergrundaufgaben und Benachrichtigungen
 
 | Auslöser | Umsetzung | Benachrichtigung |
 |---|---|---|
 | Neues Coaching-Feedback | direkt in `add_feedback` | an Lernende:n |
-| Reflexion fällig | geplante Aufgabe, freitags 14 Uhr, nur in Schulwochen | an Lernende ohne Reflexion |
+| Reflexion fällig | geplante Aufgabe, freitags 14 Uhr | an Lernende, die den Kurs diese Woche geplant, aber nicht reflektiert haben |
 | Neue Reflexion | Ereignis beim Speichern | an Kurslehrkräfte (Moodle-Einstellung, Standard: nur Web) |
 | Ampel neu berechnen | geplante Aufgabe nachts plus nach jedem Speichern von Plan oder Reflexion | bei Wechsel zu Gelb oder Rot: an Lernende:n |
 
@@ -131,7 +131,7 @@ Alle Benachrichtigungen laufen über einen Moodle-Message-Provider (ADR 0005). E
 
 7. **Lerndoku:** Kursauswahl, dann eine Tabelle aller Lernenden mit Ampel, Einzelsignalen und letzter Reflexion, sortierbar nach Ampelfarbe.
 8. **Lernenden-Detail:** Wochen, Kursreflexionen, allgemeine Reflexion (nur lesend) und Feedback-Faden mit Eingabefeld.
-9. **Kurseinstellungen:** Unterrichtswochen als Kalenderwochen-Auswahl, Schwellwerte und Pfad-Metadaten.
+9. **Kurseinstellungen:** Schwellwerte und Pfad-Metadaten (Unterrichtswochen entfielen mit ADR 0008).
 
 ## 4. Meilensteine
 

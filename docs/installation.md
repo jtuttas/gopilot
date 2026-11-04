@@ -122,7 +122,7 @@ Unter **Website-Administration → Allgemein → Mitteilungen → Benachrichtigu
 |---|---|---|
 | Neues Coaching-Feedback in GoPilot | Lernende bzw. Lehrkraft | Web, E-Mail, Moodle-App |
 | Lernende:r hat eine Kursreflexion in GoPilot gespeichert | Lehrkräfte des Kurses | nur Web |
-| Erinnerung an die Wochenreflexion in GoPilot (freitags 14 Uhr, nur in Schulwochen) | Lernende | Web, E-Mail, Moodle-App |
+| Erinnerung an die Wochenreflexion in GoPilot (freitags 14 Uhr, nur für Kurse mit geplanten Lernschritten in dieser Woche) | Lernende | Web, E-Mail, Moodle-App |
 | Deine GoPilot-Ampel wechselt auf Gelb oder Rot (nachts) | Lernende | Web, E-Mail, Moodle-App |
 
 Hier können Sie die Kanäle für die ganze Instanz anpassen.
@@ -262,7 +262,7 @@ Erwartet ist JSON mit `currentweek` und den Kursen des Kontos.
 | Push lässt sich nicht einschalten („nicht eingerichtet“) | VAPID-Schlüssel fehlen | 3.3 |
 | Push eingeschaltet, kommt aber nicht an | Moodle-Server darf nicht nach außen; auf dem iPhone App nicht installiert | Firewall-Freigabe (Abschnitt 1); in Safari „Zum Home-Bildschirm“ |
 | Keine Erinnerungen, Ampeln über Nacht unverändert | Moodle-Cron läuft nicht | Cron einrichten, unter **Geplante Aufgaben** „Letzter Lauf“ prüfen |
-| Ampel-Signale Planerfüllung und Reflexion sind immer grau | im Kurs keine Unterrichtswochen hinterlegt | Lehrkraft pflegt sie in der App unter **Kurseinstellungen** |
+| Ampel-Signale Planerfüllung und Reflexion sind immer grau | die:der Lernende hat noch keine Lernschritte des Kurses für eine abgeschlossene Woche geplant | normal; die Signale starten mit dem ersten Wochenplan |
 
 ## 7. Aktualisieren
 

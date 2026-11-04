@@ -1,5 +1,4 @@
 import {
-  Badge,
   Button,
   Card,
   Divider,
@@ -124,9 +123,6 @@ function ReflectionEditor({ week, userid, editable }: { week: Week; userid: numb
                 <Title order={3} size="h4">
                   {c.fullname}
                 </Title>
-                <Badge size="xs" variant="outline" color={c.isschoolweek ? 'blue' : 'gray'} style={{ flexShrink: 0 }}>
-                  {c.isschoolweek ? 'Schulwoche' : 'Betriebswoche'}
-                </Badge>
               </Group>
 
               {items.length > 0 && (

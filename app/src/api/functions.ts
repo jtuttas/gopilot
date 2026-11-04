@@ -64,7 +64,6 @@ export const api = {
   saveCourseConfig: (p: SaveCourseConfigParams) =>
     call<CourseConfig>('local_gopilot_save_courseconfig', {
       courseid: p.courseid,
-      teachingweeks: p.teachingweeks,
       usedefaults: p.usedefaults,
       thresholds: { ...p.thresholds },
     }),

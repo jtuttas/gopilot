@@ -68,7 +68,6 @@ export interface SelfAssessment {
 export interface CourseWeek {
   courseid: number
   fullname: string
-  isschoolweek: boolean
   reflection: string
   selfassessments: SelfAssessment[]
   feedback: FeedbackEntry[]
@@ -96,7 +95,6 @@ export interface OverviewCourse {
   canuse: boolean
   cancoach: boolean
   canconfigure: boolean
-  isschoolweek: boolean
   progress: Progress
   ampel: Ampel
 }
@@ -144,14 +142,12 @@ export interface LerndokuLearner {
 export interface Lerndoku {
   course: { id: number; fullname: string }
   currentweek: WeekString
-  isschoolweek: boolean
   learners: LerndokuLearner[]
 }
 
 export interface LearnerWeek {
   week: WeekString
   closed: boolean
-  isschoolweek: boolean
   goal: string
   generalreflection: string
   reflectedat: number
@@ -192,7 +188,6 @@ export interface ConfigPath {
 
 export interface CourseConfig {
   courseid: number
-  teachingweeks: WeekString[]
   usedefaults: boolean
   thresholds: Thresholds
   defaults: Thresholds
@@ -242,7 +237,6 @@ export interface SaveReflectionParams {
 
 export interface SaveCourseConfigParams {
   courseid: number
-  teachingweeks: WeekString[]
   usedefaults: boolean
   thresholds: Thresholds
 }

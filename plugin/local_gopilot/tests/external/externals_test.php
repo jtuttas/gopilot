@@ -427,32 +427,29 @@ final class externals_test extends \externallib_advanced_testcase {
     public function test_courseconfig(): void {
         $this->setUser($this->teachera);
         $result = $this->call('get_courseconfig', [$this->coursea->id]);
-        $this->assertSame([], $result['teachingweeks']);
+        $this->assertArrayNotHasKey('teachingweeks', $result);
         $this->assertTrue($result['usedefaults']);
         $this->assertSame(70, $result['thresholds']['plangreen']);
         $this->assertSame($result['defaults'], $result['thresholds']);
         $this->assertCount(2, $result['paths']);
         $this->assertCount(2, $result['paths'][0]['steps'], 'Labels are no learning steps');
 
-        $weeks = [weeks::current(), weeks::add(weeks::current(), -2)];
         $thresholds = ['plangreen' => 80, 'planyellow' => 50, 'backlogyellow' => 1, 'backlogred' => 3,
             'reflectionyellow' => 1, 'reflectionred' => 2];
-        $result = $this->call('save_courseconfig', [$this->coursea->id, $weeks, false, $thresholds]);
-        $this->assertSame([weeks::add(weeks::current(), -2), weeks::current()], $result['teachingweeks']);
+        $result = $this->call('save_courseconfig', [$this->coursea->id, false, $thresholds]);
         $this->assertFalse($result['usedefaults']);
         $this->assertSame(80, $result['thresholds']['plangreen']);
         $this->assertSame(70, $result['defaults']['plangreen']);
 
-        $result = $this->call('save_courseconfig', [$this->coursea->id, $weeks, true, $thresholds]);
+        $result = $this->call('save_courseconfig', [$this->coursea->id, true, $thresholds]);
         $this->assertTrue($result['usedefaults']);
         $this->assertSame(70, $result['thresholds']['plangreen']);
 
         $this->assert_error(
             'invalidthresholds',
             'save_courseconfig',
-            [$this->coursea->id, [], false, ['backlogyellow' => 4, 'backlogred' => 4] + $thresholds]
+            [$this->coursea->id, false, ['backlogyellow' => 4, 'backlogred' => 4] + $thresholds]
         );
-        $this->assert_error('invalidweek', 'save_courseconfig', [$this->coursea->id, ['2026-11-05'], true, []]);
 
         $this->setUser($this->learner);
         $this->expectException(\required_capability_exception::class);

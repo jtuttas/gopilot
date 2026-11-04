@@ -16,7 +16,6 @@ Die Screenshots zeigen die Testumgebung mit den Kursen „LF5 Software zur Verwa
 | **Wochenplan** | deine Auswahl an Lernschritten für eine Woche, dazu dein **Wochenziel** |
 | **Reflexion** | dein Rückblick auf die Woche: allgemein und pro Kurs, mit **Selbsteinschätzung** |
 | **Coaching-Feedback** | Rückmeldung deiner Lehrkraft zu deiner Kursreflexion; du kannst antworten |
-| **Schulwoche / Betriebswoche** | Woche mit bzw. ohne Unterricht in einem Kurs |
 | **Förder-Ampel** | Hinweis, ob in einem Kurs Unterstützung sinnvoll sein könnte, keine Bewertung |
 
 ---
@@ -53,12 +52,12 @@ Die Ampel ist ein **Hinweis für dich, keine Note**. Nur du und die Lehrkräfte 
 
 | Signal | Worum es geht | Standard-Grenzen |
 |---|---|---|
-| **Planerfüllung** | Wie viele deiner geplanten Lernschritte hast du in der letzten Schulwoche geschafft? | grün ab 70 %, gelb ab 40 %, darunter rot |
+| **Planerfüllung** | Wie viele deiner geplanten Lernschritte hast du letzte Woche geschafft? | grün ab 70 %, gelb ab 40 %, darunter rot |
 | **Pfadrückstand** | Wie viele Lernschritte sind über ihren Soll-Termin hinaus noch offen? | 0–1 grün, 2–3 gelb, ab 4 rot |
-| **Reflexion** | Hast du die letzten Schulwochen reflektiert? | 1 fehlende Woche gelb, 2 in Folge rot |
+| **Reflexion** | Hast du die Wochen reflektiert, für die du etwas aus dem Kurs geplant hattest? | 1 fehlende Woche gelb, 2 in Folge rot |
 | **Selbsteinschätzung** | Wie sicher hast du dich zuletzt eingeschätzt? | „unsicher“ gelb, „komme nicht klar“ rot |
 
-Die Ampel zeigt immer das schlechteste Signal. Ein grauer Kreis bedeutet, dass ein Signal gerade nicht ausgewertet wird, z. B. in einer Betriebswoche. Deine Lehrkraft kann die Grenzen für ihren Kurs anpassen.
+Die Ampel zeigt immer das schlechteste Signal. Ein grauer Kreis bedeutet, dass ein Signal gerade nicht ausgewertet wird, z. B. wenn du letzte Woche nichts aus diesem Kurs geplant hattest. Deine Lehrkraft kann die Grenzen für ihren Kurs anpassen.
 
 ## Lernpfade
 
@@ -76,15 +75,16 @@ Unter **Plan** legst du fest, was du dir für **diese** oder die **nächste Woch
 ![Wochenplan: Wochenziel](img-app/a06-wochenplan-ziel.png)
 
 1. **Wochenziel formulieren:** Was willst du in dieser Woche erreichen? Dein Wochenziel sehen alle deine Lehrkräfte.
-2. **Lernschritte auswählen:** Die Lernschritte sind nach Kurs und Lernpfad sortiert. Die Badges zeigen, ob in diesem Kurs **Schulwoche** oder **Betriebswoche** ist. Bereits erledigte Schritte sind ausgeblendet, über **Erledigte anzeigen** holst du sie zurück.
+2. **Lernschritte auswählen:** Die Lernschritte sind nach Kurs und Lernpfad sortiert. Bereits erledigte Schritte sind ausgeblendet, über **Erledigte anzeigen** holst du sie zurück.
 3. **Plan speichern:** Die Leiste unten zeigt, wie viele Schritte du ausgewählt hast.
 
 ![Wochenplan: Lernschritte auswählen](img-app/a07-wochenplan-auswahl.png)
 
 Tipps:
 
-- Plane lieber weniger und schaffe es. Die Planerfüllung zählt nur in Schulwochen.
-- In Betriebswochen ist Planen freiwillig. Es hilft aber, am Ball zu bleiben.
+- Plane lieber weniger und schaffe es.
+- Wenn du einen Kurs in einer Woche einplanst, reflektiere ihn am Ende der Woche. Freitags erinnert dich GoPilot daran.
+- Wochen ohne Plan, z. B. Ferien, zählen nicht für die Ampel.
 - Vergangene Wochen lassen sich nicht mehr umplanen.
 
 ## Woche reflektieren
@@ -167,15 +167,7 @@ Neue Reflexionen in Ihren Kursen meldet GoPilot Ihnen standardmäßig im Moodle-
 
 Die Kurseinstellungen kann ändern, wer den Kurs in Moodle bearbeiten darf (Rolle Trainer/in).
 
-### Unterrichtswochen
-
-Wählen Sie die Kalenderwochen, in denen Ihr Kurs Unterricht hat. Nur in diesen **Schulwochen** zählen Planerfüllung und fehlende Reflexion. In Betriebswochen bleiben diese Signale stumm.
-
-![Unterrichtswochen auswählen](img-app/b03-unterrichtswochen.png)
-
-- Wochen sind nach Monaten gruppiert, mit Kalenderwoche und Datum. **Ganzer Monat**, **Alle**, **Keine** und **Umkehren** beschleunigen die Auswahl.
-- Pflegen Sie die Wochen am besten einmal zum Schuljahresbeginn aus dem Blockplan.
-- Ohne Unterrichtswochen wertet GoPilot nur Pfadrückstand und Selbsteinschätzung aus.
+Unterrichtswochen müssen Sie nicht pflegen. Planerfüllung und fehlende Reflexion richten sich nach den Wochenplänen der Lernenden: Es zählen nur Wochen, in denen jemand Lernschritte Ihres Kurses geplant hat. Ferien und Betriebswochen ohne Plan färben die Ampel deshalb nicht. Wer gar nicht plant, fällt nur über den **Pfadrückstand** auf. Setzen Sie darum in Moodle Soll-Termine für die Lernschritte.
 
 ### Schwellwerte
 
@@ -192,10 +184,10 @@ Für jeden Lernpfad und Lernschritt können Sie optional **Phase** (z. B. „Inf
 ## Häufige Fragen
 
 **Eine Ampel steht auf Rot, obwohl die:der Lernende gut mitarbeitet.**
-Schauen Sie auf das auslösende Signal. Oft sind es Soll-Termine, die für die Lerngruppe zu früh liegen, oder Unterrichtswochen, die nicht stimmen. Passen Sie die Termine in Moodle oder die Kurseinstellungen an.
+Schauen Sie auf das auslösende Signal. Oft sind es Soll-Termine, die für die Lerngruppe zu früh liegen, oder Schwellwerte, die nicht zur Lerngruppe passen. Passen Sie die Termine in Moodle oder die Kurseinstellungen an.
 
 **Ein Signal zeigt einen grauen Kreis.**
-Es wird gerade nicht ausgewertet, z. B. weil keine Unterrichtswochen hinterlegt sind, die letzte Woche keine Schulwoche war oder nichts aus diesem Kurs geplant wurde.
+Es wird gerade nicht ausgewertet, z. B. weil die:der Lernende letzte Woche bzw. noch nie etwas aus diesem Kurs geplant hat.
 
 **Lernende sehen einen Lernschritt nicht.**
 GoPilot zeigt nur Aktivitäten, die in Moodle sichtbar und für die Person verfügbar sind. Textfelder und der Abschnitt „Allgemeines“ erscheinen nicht.

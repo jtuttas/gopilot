@@ -175,7 +175,6 @@ final class calculator_test extends \advanced_testcase {
      * Plan: completed until Sunday 23:59:59 counts, later completions do not; 2 of 3 = 67 % = yellow.
      */
     public function test_plan_fulfilment(): void {
-        courseconfig::save($this->course->id, [self::LASTWEEK], true, []);
         $cms = [$this->page(), $this->page(), $this->page()];
         $this->plan(self::LASTWEEK, $cms);
         $this->complete($cms[0], weeks::start(self::LASTWEEK) + DAYSECS);
@@ -195,7 +194,6 @@ final class calculator_test extends \advanced_testcase {
      */
     public function test_plan_colours(): void {
         global $DB;
-        courseconfig::save($this->course->id, [self::LASTWEEK], true, []);
         $cms = [];
         for ($i = 0; $i < 10; $i++) {
             $cms[] = $this->page();
@@ -219,7 +217,6 @@ final class calculator_test extends \advanced_testcase {
      */
     public function test_plan_uses_frozen_state(): void {
         global $DB;
-        courseconfig::save($this->course->id, [self::LASTWEEK], true, []);
         $cm = $this->page();
         $week = $this->plan(self::LASTWEEK, [$cm]);
         $this->complete($cm, weeks::start(self::LASTWEEK));
@@ -229,23 +226,9 @@ final class calculator_test extends \advanced_testcase {
     }
 
     /**
-     * Plan: inactive in a Betriebswoche (last closed week is no school week).
-     */
-    public function test_plan_inactive_in_company_week(): void {
-        courseconfig::save($this->course->id, [weeks::add(self::LASTWEEK, -1), self::CURRENT], true, []);
-        $this->plan(self::LASTWEEK, [$this->page()]);
-        $signal = $this->signal('plan');
-        $this->assertFalse($signal['active']);
-        $this->assertSame('none', $signal['colour']);
-        $this->assertSame(0, $signal['value']);
-        $this->assertSame(get_string('signal_plan_noschoolweek', 'local_gopilot'), $signal['reason']);
-    }
-
-    /**
      * Plan: inactive if nothing of this course was planned (even if other courses were).
      */
     public function test_plan_inactive_without_planned_steps(): void {
-        courseconfig::save($this->course->id, [self::LASTWEEK], true, []);
         $other = $this->getDataGenerator()->create_course(['enablecompletion' => 1]);
         $this->getDataGenerator()->enrol_user($this->user->id, $other->id, 'student');
         $this->plan(self::LASTWEEK, [$this->page(0, $other)]);
@@ -255,11 +238,17 @@ final class calculator_test extends \advanced_testcase {
     }
 
     /**
-     * Plan: a course without teaching weeks never has a school week.
+     * Plan: works without any course settings; only the most recently closed week counts.
      */
-    public function test_plan_inactive_without_teaching_weeks(): void {
+    public function test_plan_without_course_settings(): void {
+        $this->plan(weeks::add(self::LASTWEEK, -1), [$this->page()]);
+        $signal = $this->signal('plan');
+        $this->assertFalse($signal['active'], 'Older weeks do not count');
+        $this->assertSame('none', $signal['colour']);
+        $this->assertSame(0, $signal['value']);
+
         $this->plan(self::LASTWEEK, [$this->page()]);
-        $this->assertFalse($this->signal('plan')['active']);
+        $this->assertTrue($this->signal('plan')['active']);
     }
 
     /**
@@ -310,28 +299,34 @@ final class calculator_test extends \advanced_testcase {
     }
 
     /**
-     * Reflection: inactive without teaching weeks and without closed school week.
+     * Reflection: inactive until a closed week with planned steps of this course exists.
      */
     public function test_reflection_inactive(): void {
         $signal = $this->signal('reflection');
         $this->assertFalse($signal['active']);
-        $this->assertSame(get_string('signal_reflection_noteachingweeks', 'local_gopilot'), $signal['reason']);
+        $this->assertSame(get_string('signal_reflection_noplannedweek', 'local_gopilot'), $signal['reason']);
 
-        courseconfig::save($this->course->id, [self::CURRENT, weeks::add(self::CURRENT, 1)], true, []);
+        // Planned only in the current week (not closed) or only another course: still inactive.
+        $this->plan(self::CURRENT, [$this->page()]);
+        $other = $this->getDataGenerator()->create_course(['enablecompletion' => 1]);
+        $this->getDataGenerator()->enrol_user($this->user->id, $other->id, 'student');
+        $this->plan(self::LASTWEEK, [$this->page(0, $other)]);
         $signal = $this->signal('reflection');
         $this->assertFalse($signal['active']);
-        $this->assertSame(get_string('signal_reflection_noclosedweek', 'local_gopilot'), $signal['reason']);
+        $this->assertSame(get_string('signal_reflection_noplannedweek', 'local_gopilot'), $signal['reason']);
     }
 
     /**
-     * Reflection: consecutive closed school weeks without course reflection, newest first;
-     * company weeks in between are skipped and the current week does not count.
+     * Reflection: consecutive closed weeks with planned steps but without course reflection, newest first;
+     * weeks without planning (holidays, company weeks) are skipped and the current week does not count.
      */
     public function test_reflection_missing_weeks(): void {
         $w1 = weeks::add(self::LASTWEEK, -3);
         $w2 = weeks::add(self::LASTWEEK, -2);
         $w3 = self::LASTWEEK;
-        courseconfig::save($this->course->id, [$w1, $w2, $w3, self::CURRENT], true, []);
+        foreach ([$w1, $w2, $w3, self::CURRENT] as $week) {
+            $this->plan($week, [$this->page()]);
+        }
 
         $this->assertSame(3, $this->signal('reflection')['value']);
         $this->assertSame('red', $this->signal('reflection')['colour']);
@@ -379,7 +374,7 @@ final class calculator_test extends \advanced_testcase {
      * Thresholds of the course override the defaults.
      */
     public function test_threshold_overrides(): void {
-        courseconfig::save($this->course->id, [self::LASTWEEK], false, [
+        courseconfig::save($this->course->id, false, [
             'plangreen' => 60, 'planyellow' => 30, 'backlogyellow' => 1, 'backlogred' => 2,
             'reflectionyellow' => 1, 'reflectionred' => 3,
         ]);
@@ -403,7 +398,7 @@ final class calculator_test extends \advanced_testcase {
     public function test_invalid_thresholds(): void {
         $this->expectException(\moodle_exception::class);
         $this->expectExceptionMessage(get_string('invalidthresholds', 'local_gopilot'));
-        courseconfig::save($this->course->id, [], false, ['plangreen' => 40, 'planyellow' => 40]);
+        courseconfig::save($this->course->id, false, ['plangreen' => 40, 'planyellow' => 40]);
     }
 
     /**
@@ -415,15 +410,15 @@ final class calculator_test extends \advanced_testcase {
         $this->assertSame('yellow', calculator::worst(['green', 'yellow', 'green']));
         $this->assertSame('red', calculator::worst(['yellow', 'red', 'green']));
 
-        // Backlog green (active), reflection red: overall red.
-        courseconfig::save($this->course->id, [weeks::add(self::LASTWEEK, -1), self::LASTWEEK], true, []);
-        $result = (new calculator($this->now))->compute($this->user->id, $this->course->id);
-        $this->assertSame('red', $result['colour']);
-
         // Only the backlog is active: green.
-        courseconfig::save($this->course->id, [], true, []);
         $result = (new calculator($this->now))->compute($this->user->id, $this->course->id);
         $this->assertSame('green', $result['colour']);
+
+        // Two planned weeks without reflection and nothing done: plan and reflection red, overall red.
+        $this->plan(weeks::add(self::LASTWEEK, -1), [$this->page()]);
+        $this->plan(self::LASTWEEK, [$this->page()]);
+        $result = (new calculator($this->now))->compute($this->user->id, $this->course->id);
+        $this->assertSame('red', $result['colour']);
     }
 
     /**

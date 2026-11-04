@@ -131,7 +131,6 @@ class structures {
         return new external_single_structure([
             'courseid' => new external_value(PARAM_INT, 'Course id'),
             'fullname' => new external_value(PARAM_TEXT, 'Course name'),
-            'isschoolweek' => new external_value(PARAM_BOOL, 'Teaching week of this course'),
             'reflection' => new external_value(PARAM_TEXT, 'Course reflection'),
             'selfassessments' => new external_multiple_structure(self::selfassessment(), 'Self-assessments'),
             'feedback' => new external_multiple_structure(self::feedbackentry(), 'Feedback thread, oldest first'),
@@ -164,7 +163,6 @@ class structures {
         return new external_single_structure([
             'week' => new external_value(PARAM_RAW, 'Monday YYYY-MM-DD'),
             'closed' => new external_value(PARAM_BOOL, 'Week is closed'),
-            'isschoolweek' => new external_value(PARAM_BOOL, 'Teaching week of this course'),
             'goal' => new external_value(PARAM_TEXT, 'Weekly goal'),
             'generalreflection' => new external_value(PARAM_TEXT, 'General reflection'),
             'reflectedat' => new external_value(PARAM_INT, 'Time of last reflection, 0 = none'),

@@ -3,10 +3,8 @@ import {
   Autocomplete,
   Button,
   Card,
-  Chip,
   Group,
   NumberInput,
-  SegmentedControl,
   Select,
   SimpleGrid,
   Stack,
@@ -16,7 +14,7 @@ import {
   Title,
 } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
-import { IconAdjustments, IconCalendar, IconDeviceFloppy, IconRoute } from '@tabler/icons-react'
+import { IconAdjustments, IconDeviceFloppy, IconRoute } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
 import { errorMessage } from '../api/client'
@@ -28,109 +26,8 @@ import { ErrorAlert, Loading } from '../components/QueryState'
 import { modLabel } from '../lib/format'
 import { LEVEL_LABELS } from '../lib/ampel'
 import { validateThresholds } from '../lib/thresholds'
-import { addDays, isoWeek, mondayOf, schoolYearOf, schoolYearWeeks, weekRangeLabel } from '../lib/week'
 
-const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 const PHASES = ['Informieren', 'Planen', 'Entscheiden', 'Durchführen', 'Kontrollieren', 'Bewerten', 'Reflektieren']
-
-// ------------------------------------------------------------ Unterrichtswochen
-
-function TeachingWeeks({ selected, onChange }: { selected: Set<string>; onChange: (s: Set<string>) => void }) {
-  const thisYear = schoolYearOf()
-  const [year, setYear] = useState(thisYear)
-  const weeks = useMemo(() => schoolYearWeeks(year), [year])
-  const current = mondayOf()
-  const byMonth = useMemo(() => {
-    const groups = new Map<string, string[]>()
-    for (const w of weeks) {
-      // A week belongs to the month of its Thursday (ISO rule).
-      const [y, m] = addDays(w, 3).split('-').map(Number)
-      const key = `${MONTHS[m - 1]} ${y}`
-      groups.set(key, [...(groups.get(key) ?? []), w])
-    }
-    return [...groups.entries()]
-  }, [weeks])
-  const inYear = weeks.filter((w) => selected.has(w)).length
-
-  const setMany = (list: string[], on: boolean) => {
-    const next = new Set(selected)
-    list.forEach((w) => (on ? next.add(w) : next.delete(w)))
-    onChange(next)
-  }
-  const invert = () => {
-    const next = new Set(selected)
-    weeks.forEach((w) => (next.has(w) ? next.delete(w) : next.add(w)))
-    onChange(next)
-  }
-
-  return (
-    <Stack gap="md">
-      <Text size="sm" c="dimmed">
-        Wähle die Kalenderwochen, in denen dieser Kurs Unterricht hat (Schulwochen). Nur in diesen Wochen wirken die Signale
-        Planerfüllung und fehlende Reflexion.
-      </Text>
-      <Group justify="space-between" wrap="wrap">
-        <SegmentedControl
-          value={String(year)}
-          onChange={(v) => setYear(Number(v))}
-          data={[thisYear, thisYear + 1].map((y) => ({ value: String(y), label: `Schuljahr ${y}/${String(y + 1).slice(2)}` }))}
-          aria-label="Schuljahr"
-        />
-        <Group gap="xs">
-          <Button size="xs" variant="default" onClick={() => setMany(weeks, true)}>
-            Alle
-          </Button>
-          <Button size="xs" variant="default" onClick={() => setMany(weeks, false)}>
-            Keine
-          </Button>
-          <Button size="xs" variant="default" onClick={invert}>
-            Umkehren
-          </Button>
-        </Group>
-      </Group>
-      <Text size="sm" fw={500}>
-        {inYear} Unterrichtswochen im Schuljahr ausgewählt
-      </Text>
-      <Stack gap="sm">
-        {byMonth.map(([month, list]) => {
-          const all = list.every((w) => selected.has(w))
-          return (
-            <div key={month}>
-              <Group gap="xs" mb={4}>
-                <Text size="sm" fw={600} w={130}>
-                  {month}
-                </Text>
-                <Button size="compact-xs" variant="subtle" onClick={() => setMany(list, !all)}>
-                  {all ? 'Monat abwählen' : 'Ganzer Monat'}
-                </Button>
-              </Group>
-              <Group gap={6}>
-                {list.map((w) => (
-                  <Chip
-                    key={w}
-                    size="sm"
-                    checked={selected.has(w)}
-                    onChange={(on) => setMany([w], on)}
-                    variant={w === current ? 'outline' : 'light'}
-                    aria-label={`KW ${isoWeek(w).week}, ${weekRangeLabel(w)}${w === current ? ', aktuelle Woche' : ''}`}
-                  >
-                    <Text span size="xs" fw={600}>
-                      KW {isoWeek(w).week}
-                    </Text>
-                    <Text span size="xs" c="dimmed">
-                      {' '}
-                      {weekRangeLabel(w).replace(/\d{4}$/, '')}
-                    </Text>
-                  </Chip>
-                ))}
-              </Group>
-            </div>
-          )
-        })}
-      </Stack>
-    </Stack>
-  )
-}
 
 // ------------------------------------------------------------ Schwellwerte
 
@@ -139,8 +36,8 @@ const FIELDS: { key: keyof Thresholds; label: string; description: string; max?:
   { key: 'planyellow', label: 'Planerfüllung: Gelb ab (%)', description: 'darunter Rot', max: 100 },
   { key: 'backlogyellow', label: 'Pfadrückstand: Gelb ab', description: 'überfällige Lernschritte' },
   { key: 'backlogred', label: 'Pfadrückstand: Rot ab', description: 'überfällige Lernschritte' },
-  { key: 'reflectionyellow', label: 'Fehlende Reflexion: Gelb ab', description: 'Schulwochen in Folge ohne Kursreflexion' },
-  { key: 'reflectionred', label: 'Fehlende Reflexion: Rot ab', description: 'Schulwochen in Folge ohne Kursreflexion' },
+  { key: 'reflectionyellow', label: 'Fehlende Reflexion: Gelb ab', description: 'geplante Wochen in Folge ohne Kursreflexion' },
+  { key: 'reflectionred', label: 'Fehlende Reflexion: Rot ab', description: 'geplante Wochen in Folge ohne Kursreflexion' },
 ]
 
 function ThresholdForm({
@@ -310,7 +207,6 @@ function PathMetaEditor({ config }: { config: CourseConfig }) {
 // ------------------------------------------------------------ Page
 
 function SettingsEditor({ config }: { config: CourseConfig }) {
-  const [weeks, setWeeks] = useState(() => new Set(config.teachingweeks))
   const [usedefaults, setUsedefaults] = useState(config.usedefaults)
   const [thresholds, setThresholds] = useState(config.thresholds)
   const save = useSaveCourseConfig()
@@ -318,7 +214,7 @@ function SettingsEditor({ config }: { config: CourseConfig }) {
 
   const submit = () =>
     save.mutate(
-      { courseid: config.courseid, teachingweeks: [...weeks].sort(), usedefaults, thresholds },
+      { courseid: config.courseid, usedefaults, thresholds },
       {
         onSuccess: () => notifications.show({ color: 'teal', message: 'Kurseinstellungen gespeichert.' }),
         onError: (e) => notifications.show({ color: 'red', title: 'Nicht gespeichert', message: errorMessage(e) }),
@@ -339,11 +235,8 @@ function SettingsEditor({ config }: { config: CourseConfig }) {
   )
 
   return (
-    <Tabs defaultValue="weeks" keepMounted={false}>
+    <Tabs defaultValue="thresholds" keepMounted={false}>
       <Tabs.List mb="md">
-        <Tabs.Tab value="weeks" leftSection={<IconCalendar size={16} />}>
-          Unterrichtswochen
-        </Tabs.Tab>
         <Tabs.Tab value="thresholds" leftSection={<IconAdjustments size={16} />}>
           Schwellwerte
         </Tabs.Tab>
@@ -351,10 +244,6 @@ function SettingsEditor({ config }: { config: CourseConfig }) {
           Pfad-Metadaten
         </Tabs.Tab>
       </Tabs.List>
-      <Tabs.Panel value="weeks">
-        <TeachingWeeks selected={weeks} onChange={setWeeks} />
-        {saveBar}
-      </Tabs.Panel>
       <Tabs.Panel value="thresholds">
         <ThresholdForm
           usedefaults={usedefaults}

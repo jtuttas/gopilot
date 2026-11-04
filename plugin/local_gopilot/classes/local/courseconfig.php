@@ -19,7 +19,7 @@ namespace local_gopilot\local;
 use moodle_exception;
 
 /**
- * Course settings: teaching weeks and Ampel thresholds.
+ * Course settings: Ampel thresholds.
  *
  * @package    local_gopilot
  * @copyright  2026 Jörg Tuttas
@@ -39,9 +39,6 @@ class courseconfig {
     /** @var int */
     protected $courseid;
 
-    /** @var string[] */
-    protected $teachingweeks = [];
-
     /** @var array|null custom thresholds, null = defaults */
     protected $thresholds = null;
 
@@ -55,34 +52,11 @@ class courseconfig {
         $this->courseid = $courseid;
         $record = $DB->get_record('local_gopilot_courseconfig', ['courseid' => $courseid]);
         if ($record) {
-            $weeks = json_decode((string)$record->teachingweeks, true);
-            $this->teachingweeks = is_array($weeks) ? array_values(array_filter($weeks, 'is_string')) : [];
             $thresholds = json_decode((string)$record->thresholds, true);
             if (is_array($thresholds) && $thresholds) {
                 $this->thresholds = array_map('intval', array_intersect_key($thresholds, self::DEFAULTS)) + self::DEFAULTS;
             }
         }
-    }
-
-    /**
-     * Teaching weeks (Mondays), sorted ascending.
-     *
-     * @return string[]
-     */
-    public function get_teachingweeks(): array {
-        $weeks = $this->teachingweeks;
-        sort($weeks);
-        return $weeks;
-    }
-
-    /**
-     * Whether the week is a teaching week of this course.
-     *
-     * @param string $week
-     * @return bool
-     */
-    public function is_schoolweek(string $week): bool {
-        return in_array($week, $this->teachingweeks, true);
     }
 
     /**
@@ -107,20 +81,13 @@ class courseconfig {
      * Validate and save a configuration.
      *
      * @param int $courseid
-     * @param string[] $teachingweeks
      * @param bool $usedefaults
      * @param array $thresholds ignored if $usedefaults
      * @return self the reloaded configuration
-     * @throws moodle_exception invalidweek, invalidthresholds
+     * @throws moodle_exception invalidthresholds
      */
-    public static function save(int $courseid, array $teachingweeks, bool $usedefaults, array $thresholds): self {
+    public static function save(int $courseid, bool $usedefaults, array $thresholds): self {
         global $DB;
-        foreach ($teachingweeks as $week) {
-            weeks::require_valid($week);
-        }
-        $teachingweeks = array_values(array_unique($teachingweeks));
-        sort($teachingweeks);
-
         $json = '';
         if (!$usedefaults) {
             $values = [];
@@ -144,7 +111,6 @@ class courseconfig {
         $record = $DB->get_record('local_gopilot_courseconfig', ['courseid' => $courseid]);
         $data = (object)[
             'courseid' => $courseid,
-            'teachingweeks' => json_encode($teachingweeks),
             'thresholds' => $json,
             'timemodified' => time(),
         ];

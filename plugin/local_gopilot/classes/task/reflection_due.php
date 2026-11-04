@@ -16,12 +16,12 @@
 
 namespace local_gopilot\task;
 
-use local_gopilot\local\courseconfig;
+use local_gopilot\local\access;
 use local_gopilot\local\notifier;
 use local_gopilot\local\weeks;
 
 /**
- * Reminds learners on Friday afternoon to reflect in school weeks.
+ * Reminds learners on Friday afternoon to reflect on the courses they planned this week.
  *
  * @package    local_gopilot
  * @copyright  2026 Jörg Tuttas
@@ -46,28 +46,25 @@ class reflection_due extends \core\task\scheduled_task {
         global $DB;
         $week = weeks::current();
         $pending = [];
-        foreach ($DB->get_records('local_gopilot_courseconfig') as $config) {
-            $courseid = (int)$config->courseid;
-            if (
-                !$DB->record_exists('course', ['id' => $courseid])
-                    || !(new courseconfig($courseid))->is_schoolweek($week)
-            ) {
+        // Learners who planned steps of a course this week and have not reflected on it yet.
+        $sql = "SELECT DISTINCT w.id AS weekid, w.userid, p.courseid
+                  FROM {local_gopilot_planitem} p
+                  JOIN {local_gopilot_week} w ON w.id = p.weekid
+                  JOIN {course} c ON c.id = p.courseid
+                 WHERE w.week = :week
+              ORDER BY w.userid, p.courseid";
+        $rows = $DB->get_recordset_sql($sql, ['week' => $week]);
+        foreach ($rows as $row) {
+            $userid = (int)$row->userid;
+            $courseid = (int)$row->courseid;
+            $text = $DB->get_field('local_gopilot_coursereflection', 'text', ['weekid' => $row->weekid, 'courseid' => $courseid]);
+            if (trim((string)$text) !== '' || !access::is_learner($courseid, $userid)) {
                 continue;
             }
             $context = \context_course::instance($courseid);
-            $course = get_course($courseid);
-            $users = get_enrolled_users($context, 'local/gopilot:use', 0, 'u.id', null, 0, 0, true);
-            foreach ($users as $user) {
-                $sql = "SELECT cr.text
-                          FROM {local_gopilot_coursereflection} cr
-                          JOIN {local_gopilot_week} w ON w.id = cr.weekid
-                         WHERE w.userid = :userid AND w.week = :week AND cr.courseid = :courseid";
-                $text = $DB->get_field_sql($sql, ['userid' => $user->id, 'week' => $week, 'courseid' => $courseid]);
-                if (trim((string)$text) === '') {
-                    $pending[(int)$user->id][] = format_string($course->fullname, true, ['context' => $context]);
-                }
-            }
+            $pending[$userid][] = format_string(get_course($courseid)->fullname, true, ['context' => $context]);
         }
+        $rows->close();
         foreach ($pending as $userid => $courses) {
             $a = (object)['courses' => implode(', ', $courses), 'kw' => weeks::number($week)];
             notifier::send(

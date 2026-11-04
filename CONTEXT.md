@@ -26,9 +26,7 @@ Frontend für Moodle zur Förderung des selbstgesteuerten Lernens, inspiriert vo
 | Pfad-Metadaten | Zusatzinfos zu Lernpfad/Lernschritt im Plugin (Phase, Dauer, Niveau) | entschieden |
 | Lernplaner | Planungswerkzeug der Lernenden; Planungseinheit ist die Planungswoche | entschieden |
 | Planungswoche | Kalenderwoche Mo–So; jede Woche kann geplant und reflektiert werden | entschieden |
-| Schulwoche | Planungswoche, in der ein bestimmter Kurs Unterricht hat; nur hier wirken für diesen Kurs die Signale Planerfüllung und fehlende Reflexion | entschieden |
-| Unterrichtswochen | Kurs-Metadatum im Plugin: Liste der Kalenderwochen mit Unterricht, von der Kurslehrkraft einmal pro Schuljahr gepflegt; ein WebUntis-Import ist eine mögliche spätere Erweiterung | entschieden |
-| Betriebswoche | Planungswoche ohne Berufsschule; Planen/Reflektieren freiwillig, keine Plan- oder Reflexionssignale. Pfadrückstand zählt weiterhin, wenn Soll-Termine darin liegen | entschieden |
+| Geplante Woche | Planungswoche, in der eine:r Lernende:r Lernschritte eines Kurses geplant hat; nur solche Wochen zählen für das Signal fehlende Reflexion und die Reflexions-Erinnerung. Unterrichtswochen, Schulwochen und Betriebswochen gibt es nicht mehr (ADR 0008) | entschieden |
 | Wochenplan | Auswahl von Lernschritten (aus beliebigen Lernpfaden) für eine Planungswoche plus Wochenziel; gespeichert im Plugin | entschieden |
 | Wochenziel | Von der/dem Lernenden selbst formuliertes Ziel für die Planungswoche; für alle Kurslehrkräfte lesbar | entschieden |
 | Reflexion | Rückblick am Wochenende: geschafft, Gründe, nächste Schritte; der Lerncoach kann antworten | entschieden |

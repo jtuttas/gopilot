@@ -92,7 +92,7 @@ Unter **Teilnehmer/innen** sehen Sie, wer im Kurs welche Rolle hat:
 |---|---|
 | **Teilnehmer/in** | GoPilot als Lernende:r nutzen: Wochen planen, reflektieren, eigene Ampel sehen |
 | **Trainer/in ohne Bearbeitungsrecht** | Lerncoach: Lerndoku und Ampeln aller Lernenden des Kurses sehen, Coaching-Feedback geben |
-| **Trainer/in** | wie oben, zusätzlich Kurseinstellungen in GoPilot ändern (z. B. Unterrichtswochen, Ampel-Schwellwerte) |
+| **Trainer/in** | wie oben, zusätzlich Kurseinstellungen in GoPilot ändern (Ampel-Schwellwerte, Pfad-Metadaten) |
 
 Jede Lehrkraft mit einer Trainer-Rolle ist automatisch Lerncoach für genau diesen Kurs. Eine eigene Zuweisung ist nicht nötig.
 
@@ -132,7 +132,6 @@ Dieselben Daten wertet GoPilot für die Lerndoku aus. Im Beispiel liegen zum Sti
 
 Folgende Einstellungen nehmen Sie nicht in Moodle vor, sondern später in GoPilot:
 
-- **Unterrichtswochen:** In welchen Kalenderwochen der Kurs Unterricht hat (Blockunterricht). Nur in diesen Wochen fließen Planerfüllung und fehlende Reflexion in die Ampel ein.
 - **Ampel-Schwellwerte:** Ab wie vielen Rückständen oder welcher Planerfüllung ein Signal gelb oder rot wird. Ohne Anpassung gelten Standardwerte.
 - **Pfad-Metadaten:** Phase, geschätzte Dauer und Niveau eines Lernschritts.
 

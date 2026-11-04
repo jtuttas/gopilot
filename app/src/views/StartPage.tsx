@@ -1,6 +1,5 @@
 import {
   Anchor,
-  Badge,
   Button,
   Card,
   Divider,
@@ -53,7 +52,7 @@ function Prompts({ overview }: { overview: Overview }) {
   const prevOpen =
     prev.data &&
     prev.data.reflectedat === 0 &&
-    (prev.data.items.length > 0 || prev.data.goal !== '' || prev.data.courses.some((c) => c.isschoolweek))
+    (prev.data.items.length > 0 || prev.data.goal !== '')
 
   return (
     <Stack gap="sm">
@@ -139,14 +138,9 @@ function CourseCard({ course }: { course: OverviewCourse }) {
   return (
     <Card withBorder radius="md" padding="md">
       <Stack gap="sm">
-        <Group justify="space-between" align="flex-start" wrap="nowrap" gap="xs">
-          <Title order={4} size="sm">
-            {course.fullname}
-          </Title>
-          <Badge size="xs" variant="outline" color={course.isschoolweek ? 'blue' : 'gray'} style={{ flexShrink: 0 }}>
-            {course.isschoolweek ? 'Schulwoche' : 'Betriebswoche'}
-          </Badge>
-        </Group>
+        <Title order={4} size="sm">
+          {course.fullname}
+        </Title>
         <CourseProgress {...course.progress} />
         <AmpelSummary ampel={course.ampel} audience="learner" />
         <Anchor component={Link} to={`/lernpfade/${course.id}`} size="sm">

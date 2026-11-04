@@ -23,7 +23,6 @@ use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_gopilot\ampel\calculator;
-use local_gopilot\local\courseconfig;
 use local_gopilot\local\steps;
 use local_gopilot\local\weeks;
 
@@ -94,7 +93,6 @@ class get_lerndoku extends external_api {
         return [
             'course' => ['id' => (int)$course->id, 'fullname' => format_string($course->fullname, true, ['context' => $context])],
             'currentweek' => $current,
-            'isschoolweek' => (new courseconfig($courseid))->is_schoolweek($current),
             'learners' => $learners,
         ];
     }
@@ -135,7 +133,6 @@ class get_lerndoku extends external_api {
         return new external_single_structure([
             'course' => structures::course(),
             'currentweek' => new external_value(PARAM_RAW, 'Monday of the current week'),
-            'isschoolweek' => new external_value(PARAM_BOOL, 'Current week is a teaching week'),
             'learners' => new external_multiple_structure(new external_single_structure([
                 'userid' => new external_value(PARAM_INT, 'User id'),
                 'fullname' => new external_value(PARAM_TEXT, 'Full name'),

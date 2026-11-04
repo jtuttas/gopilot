@@ -40,7 +40,6 @@ export interface MockCourse {
   learners: number[]
   coaches: number[]
   configurers: number[]
-  teachingweeks: string[]
   usedefaults: boolean
   thresholds: Thresholds
 }
@@ -130,7 +129,6 @@ export function createMockDb(today: Date = new Date()): MockDb {
       learners: [ADA, BEN, CAN],
       coaches: [LENA],
       configurers: [LENA],
-      teachingweeks: [W(-6), W(-5), W(-3), W(-2), W(-1), W(0), W(3), W(4), W(5)],
       usedefaults: true,
       thresholds: { ...DEFAULT_THRESHOLDS },
       sections: [
@@ -169,7 +167,6 @@ export function createMockDb(today: Date = new Date()): MockDb {
       learners: [ADA, BEN, CAN],
       coaches: [LENA],
       configurers: [LENA],
-      teachingweeks: [W(-1), W(0), W(6), W(7)],
       usedefaults: false,
       thresholds: { ...DEFAULT_THRESHOLDS, plangreen: 80, backlogred: 3 },
       sections: [

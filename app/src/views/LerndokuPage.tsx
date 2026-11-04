@@ -106,7 +106,7 @@ export function LerndokuPage() {
         title="Lerndoku"
         description={
           <>
-            {data.course.fullname} · {weekTitle(data.currentweek)} · {data.isschoolweek ? 'Schulwoche' : 'Betriebswoche'}
+            {data.course.fullname} · {weekTitle(data.currentweek)}
           </>
         }
         actions={

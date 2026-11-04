@@ -230,7 +230,6 @@ function buildWeek(userid: number, week: string): Week {
     .map((c) => ({
       courseid: c.id,
       fullname: c.fullname,
-      isschoolweek: c.teachingweeks.includes(week),
       reflection: w?.reflections[c.id] ?? '',
       selfassessments: selfAssessmentsFor(c, w),
       feedback: feedbackFor(userid, c.id, week),
@@ -265,9 +264,7 @@ function computeAmpel(userid: number, c: MockCourse): Ampel {
   // 1. plan
   const w = weekData(userid, lastClosed)
   const planned = planItems(userid, lastClosed, w, c.id)
-  if (!c.teachingweeks.includes(lastClosed)) {
-    signals.push({ key: 'plan', active: false, colour: 'none', value: 0, reason: 'Keine Schulwoche' })
-  } else if (planned.length === 0) {
+  if (planned.length === 0) {
     signals.push({ key: 'plan', active: false, colour: 'none', value: 0, reason: 'Kein Lernschritt dieses Kurses geplant' })
   } else {
     const done = planned.filter((s) => s.completed).length
@@ -287,14 +284,22 @@ function computeAmpel(userid: number, c: MockCourse): Ampel {
   })
 
   // 3. reflection
-  const closedSchoolWeeks = c.teachingweeks.filter((wk) => isClosed(wk)).sort().reverse()
-  if (c.teachingweeks.length === 0) {
-    signals.push({ key: 'reflection', active: false, colour: 'none', value: 0, reason: 'Keine Unterrichtswochen hinterlegt' })
-  } else if (closedSchoolWeeks.length === 0) {
-    signals.push({ key: 'reflection', active: false, colour: 'none', value: 0, reason: 'Noch keine abgeschlossene Schulwoche' })
+  // Only closed weeks in which steps of this course were planned count (ADR 0008).
+  const plannedWeeks = Object.keys(db.weeks[userid] ?? {})
+    .filter((wk) => isClosed(wk) && planItems(userid, wk, weekData(userid, wk), c.id).length > 0)
+    .sort()
+    .reverse()
+  if (plannedWeeks.length === 0) {
+    signals.push({
+      key: 'reflection',
+      active: false,
+      colour: 'none',
+      value: 0,
+      reason: 'Noch keine abgeschlossene Woche mit geplanten Lernschritten',
+    })
   } else {
     let missing = 0
-    for (const wk of closedSchoolWeeks) {
+    for (const wk of plannedWeeks) {
       if (weekData(userid, wk)?.reflections[c.id]) break
       missing++
     }
@@ -305,10 +310,10 @@ function computeAmpel(userid: number, c: MockCourse): Ampel {
       value: missing,
       reason:
         missing === 0
-          ? 'Kursreflexion der letzten Schulwoche vorhanden'
+          ? 'Kursreflexion der letzten geplanten Woche vorhanden'
           : missing === 1
-            ? '1 Schulwoche ohne Kursreflexion'
-            : `${missing} Schulwochen in Folge ohne Kursreflexion`,
+            ? 'Kursreflexion der letzten geplanten Woche fehlt'
+            : `Kursreflexion fehlt in ${missing} geplanten Wochen in Folge`,
     })
   }
 
@@ -351,7 +356,6 @@ function progressOf(userid: number, c: MockCourse) {
 function courseConfig(c: MockCourse) {
   return {
     courseid: c.id,
-    teachingweeks: [...c.teachingweeks].sort(),
     usedefaults: c.usedefaults,
     thresholds: thresholdsOf(c),
     defaults: { ...DEFAULT_THRESHOLDS },
@@ -389,7 +393,6 @@ const handlers: Record<string, Handler> = {
           canuse: canUse(userid, c),
           cancoach: canCoach(userid, c),
           canconfigure: c.configurers.includes(userid),
-          isschoolweek: c.teachingweeks.includes(db.currentWeek),
           progress: canUse(userid, c) ? progressOf(userid, c) : { completed: 0, total: 0 },
           ampel: canUse(userid, c) ? computeAmpel(userid, c) : noAmpel(c.id),
         })),
@@ -483,7 +486,6 @@ const handlers: Record<string, Handler> = {
     return {
       course: { id: c.id, fullname: c.fullname },
       currentweek: db.currentWeek,
-      isschoolweek: c.teachingweeks.includes(db.currentWeek),
       learners: c.learners.map((lid) => {
         const u = db.users.find((x) => x.id === lid)!
         const last = Object.entries(db.weeks[lid] ?? {})
@@ -513,7 +515,6 @@ const handlers: Record<string, Handler> = {
       .map(([wk, d]) => ({
         week: wk,
         closed: isClosed(wk),
-        isschoolweek: c.teachingweeks.includes(wk),
         goal: d.goal,
         generalreflection: d.generalreflection,
         reflectedat: d.reflectedat,
@@ -548,8 +549,6 @@ const handlers: Record<string, Handler> = {
   local_gopilot_save_courseconfig: (userid, p) => {
     const c = course(num(p.courseid))
     if (!c.configurers.includes(userid)) throw new MockException('nopermissions', 'Keine Berechtigung')
-    const weeks = list(p.teachingweeks).map(str)
-    weeks.forEach(requireWeek)
     const usedefaults = bool(p.usedefaults)
     if (!usedefaults) {
       const t = p.thresholds as Params
@@ -567,7 +566,6 @@ const handlers: Record<string, Handler> = {
       c.thresholds = th
     }
     c.usedefaults = usedefaults
-    c.teachingweeks = [...new Set(weeks)].sort()
     return courseConfig(c)
   },
 

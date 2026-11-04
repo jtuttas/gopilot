@@ -114,9 +114,9 @@ class calculator {
         $config = new courseconfig($courseid);
         $thresholds = $config->get_thresholds();
         $signals = [
-            $this->signal_plan($userid, $courseid, $config, $thresholds),
+            $this->signal_plan($userid, $courseid, $thresholds),
             $this->signal_backlog($userid, $courseid, $thresholds),
-            $this->signal_reflection($userid, $courseid, $config, $thresholds),
+            $this->signal_reflection($userid, $courseid, $thresholds),
             $this->signal_selfassessment($userid, $courseid),
         ];
         $colours = [];
@@ -191,16 +191,12 @@ class calculator {
      *
      * @param int $userid
      * @param int $courseid
-     * @param courseconfig $config
      * @param array $thresholds
      * @return array
      */
-    protected function signal_plan(int $userid, int $courseid, courseconfig $config, array $thresholds): array {
+    protected function signal_plan(int $userid, int $courseid, array $thresholds): array {
         global $DB;
         $week = weeks::last_closed($this->now);
-        if (!$config->is_schoolweek($week)) {
-            return self::inactive('plan', get_string('signal_plan_noschoolweek', 'local_gopilot'));
-        }
         $sql = "SELECT p.id, p.cmid, p.completedatclose
                   FROM {local_gopilot_planitem} p
                   JOIN {local_gopilot_week} w ON w.id = p.weekid
@@ -270,26 +266,30 @@ class calculator {
     }
 
     /**
-     * Signal 3: consecutive closed school weeks without course reflection.
+     * Signal 3: consecutive closed weeks with planned steps of this course but without course reflection.
+     *
+     * Only weeks in which the learner planned steps of the course count, so holidays and weeks without
+     * planning never turn the signal yellow or red (ADR 0008).
      *
      * @param int $userid
      * @param int $courseid
-     * @param courseconfig $config
      * @param array $thresholds
      * @return array
      */
-    protected function signal_reflection(int $userid, int $courseid, courseconfig $config, array $thresholds): array {
+    protected function signal_reflection(int $userid, int $courseid, array $thresholds): array {
         global $DB;
-        $teachingweeks = $config->get_teachingweeks();
-        if (!$teachingweeks) {
-            return self::inactive('reflection', get_string('signal_reflection_noteachingweeks', 'local_gopilot'));
-        }
-        $closed = array_values(array_filter($teachingweeks, function ($week) {
+        $sql = "SELECT DISTINCT w.week
+                  FROM {local_gopilot_planitem} p
+                  JOIN {local_gopilot_week} w ON w.id = p.weekid
+                 WHERE w.userid = :userid AND p.courseid = :courseid";
+        $planned = $DB->get_fieldset_sql($sql, ['userid' => $userid, 'courseid' => $courseid]);
+        $closed = array_values(array_filter($planned, function ($week) {
             return weeks::is_closed($week, $this->now);
         }));
         if (!$closed) {
-            return self::inactive('reflection', get_string('signal_reflection_noclosedweek', 'local_gopilot'));
+            return self::inactive('reflection', get_string('signal_reflection_noplannedweek', 'local_gopilot'));
         }
+        rsort($closed);
         $sql = "SELECT w.week, cr.text
                   FROM {local_gopilot_coursereflection} cr
                   JOIN {local_gopilot_week} w ON w.id = cr.weekid
@@ -301,7 +301,7 @@ class calculator {
             }
         }
         $missing = 0;
-        foreach (array_reverse($closed) as $week) {
+        foreach ($closed as $week) {
             if (isset($reflected[$week])) {
                 break;
             }

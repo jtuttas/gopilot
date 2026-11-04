@@ -33,9 +33,6 @@ class weekdata {
     /** @var array userid => full name */
     protected $names = [];
 
-    /** @var courseconfig[] by course id */
-    protected $configs = [];
-
     /**
      * Constructor.
      *
@@ -54,19 +51,6 @@ class weekdata {
      */
     public function steps(): steps {
         return $this->steps;
-    }
-
-    /**
-     * Course configuration (cached).
-     *
-     * @param int $courseid
-     * @return courseconfig
-     */
-    public function config(int $courseid): courseconfig {
-        if (!isset($this->configs[$courseid])) {
-            $this->configs[$courseid] = new courseconfig($courseid);
-        }
-        return $this->configs[$courseid];
     }
 
     /**
@@ -300,7 +284,6 @@ class weekdata {
             $result['courses'][] = [
                 'courseid' => (int)$course->id,
                 'fullname' => format_string($course->fullname, true, ['context' => \context_course::instance($course->id)]),
-                'isschoolweek' => $this->config((int)$course->id)->is_schoolweek($week),
                 'reflection' => $record ? $this->reflection((int)$record->id, (int)$course->id) : '',
                 'selfassessments' => $record ? $this->selfassessments((int)$record->id, (int)$course->id, $userid) : [],
                 'feedback' => $record ? $this->feedback((int)$record->id, (int)$course->id, $userid) : [],
@@ -321,7 +304,6 @@ class weekdata {
         return [
             'week' => $record->week,
             'closed' => weeks::is_closed($record->week, $this->now),
-            'isschoolweek' => $this->config($courseid)->is_schoolweek($record->week),
             'goal' => (string)$record->goal,
             'generalreflection' => (string)$record->generalreflection,
             'reflectedat' => (int)$record->reflectedat,

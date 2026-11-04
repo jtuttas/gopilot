@@ -3,7 +3,7 @@
 //
 // Läuft im Webserver-Container: php /opt/gopilot-dev/seed.php
 // Idempotent: Existiert der Testkurs schon, werden keine Kurse/Konten angelegt.
-// Die GoPilot-Daten (Unterrichtswochen, Wochenpläne, Reflexionen, Feedback) werden
+// Die GoPilot-Daten (Kurseinstellungen, Wochenpläne, Reflexionen, Feedback) werden
 // nur angelegt, solange local_gopilot_week leer ist.
 //
 // Testkonten (nur für die lokale Entwicklungsumgebung):
@@ -193,9 +193,9 @@ function gopilot_seed_plugin_data(): void {
         $users[$i] = $DB->get_record('user', ['username' => 'azubi' . $i], '*', MUST_EXIST);
     }
 
-    // Unterrichtswochen: LF5 die letzten drei Wochen, diese und nächste Woche; LF8 im Wechsel.
-    \local_gopilot\local\courseconfig::save($lf5->id, [$w(-3), $w(-2), $w(-1), $w(0), $w(1)], true, []);
-    \local_gopilot\local\courseconfig::save($lf8->id, [$w(-3), $w(-1), $w(1)], true, []);
+    // Kurseinstellungen mit Standard-Schwellwerten (macht die Kurse für die nächtliche Ampel bekannt).
+    \local_gopilot\local\courseconfig::save($lf5->id, true, []);
+    \local_gopilot\local\courseconfig::save($lf8->id, true, []);
 
     $cms5 = array_values(array_filter(get_fast_modinfo($lf5)->get_cms(), fn($cm) => $cm->modname !== 'label'));
     $cms8 = array_values(get_fast_modinfo($lf8)->get_cms());

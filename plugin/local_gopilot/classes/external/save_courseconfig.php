@@ -19,7 +19,6 @@ namespace local_gopilot\external;
 use context_course;
 use core_external\external_api;
 use core_external\external_function_parameters;
-use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use local_gopilot\local\courseconfig;
@@ -40,12 +39,6 @@ class save_courseconfig extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course id'),
-            'teachingweeks' => new external_multiple_structure(
-                new external_value(PARAM_RAW, 'Monday YYYY-MM-DD'),
-                'Teaching weeks',
-                VALUE_DEFAULT,
-                []
-            ),
             'usedefaults' => new external_value(PARAM_BOOL, 'Use default thresholds', VALUE_DEFAULT, true),
             'thresholds' => structures::thresholds(false),
         ]);
@@ -55,20 +48,17 @@ class save_courseconfig extends external_api {
      * Save the configuration.
      *
      * @param int $courseid
-     * @param string[] $teachingweeks
      * @param bool $usedefaults
      * @param array|null $thresholds
      * @return array like get_courseconfig
      */
     public static function execute(
         int $courseid,
-        array $teachingweeks = [],
         bool $usedefaults = true,
         ?array $thresholds = null
     ): array {
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
-            'teachingweeks' => $teachingweeks,
             'usedefaults' => $usedefaults,
             'thresholds' => $thresholds ?? [],
         ]);
@@ -77,7 +67,6 @@ class save_courseconfig extends external_api {
         require_capability('local/gopilot:configure', $context);
         courseconfig::save(
             $params['courseid'],
-            $params['teachingweeks'],
             $params['usedefaults'],
             $params['thresholds'] ?? []
         );

@@ -16,7 +16,6 @@
 
 namespace local_gopilot\task;
 
-use local_gopilot\local\courseconfig;
 use local_gopilot\local\weekdata;
 use local_gopilot\local\weeks;
 
@@ -95,20 +94,29 @@ final class tasks_test extends \advanced_testcase {
     }
 
     /**
-     * Learners without reflection in a school week get a reminder.
+     * Learners who planned steps of a course this week but have not reflected on it get a reminder.
      */
     public function test_reflection_due(): void {
         global $DB;
         $other = $this->getDataGenerator()->create_and_enrol($this->course, 'student');
         $this->getDataGenerator()->create_and_enrol($this->course, 'editingteacher');
-        $record = weekdata::get_or_create($other->id, weeks::current());
-        $DB->insert_record('local_gopilot_coursereflection', (object)['weekid' => $record->id,
-            'courseid' => $this->course->id, 'text' => 'Erledigt', 'timecreated' => time(), 'timemodified' => time()]);
+        $cm = $this->page();
+        $plan = function (\stdClass $user) use ($DB, $cm): int {
+            $record = weekdata::get_or_create($user->id, weeks::current());
+            $DB->insert_record('local_gopilot_planitem', (object)['weekid' => $record->id, 'courseid' => $this->course->id,
+                'cmid' => $cm->id, 'sortorder' => 0, 'completedatclose' => null, 'timecreated' => time()]);
+            return (int)$record->id;
+        };
 
         $sink = $this->redirectMessages();
         $this->expectOutputRegex('/sent 0 reflection reminders.*sent 1 reflection reminders/s');
+        // Nobody planned anything: no reminder.
         (new reflection_due())->execute();
-        courseconfig::save($this->course->id, [weeks::current()], true, []);
+        // Both planned, only $other reflected: one reminder.
+        $plan($this->user);
+        $weekid = $plan($other);
+        $DB->insert_record('local_gopilot_coursereflection', (object)['weekid' => $weekid,
+            'courseid' => $this->course->id, 'text' => 'Erledigt', 'timecreated' => time(), 'timemodified' => time()]);
         (new reflection_due())->execute();
         $messages = $sink->get_messages();
         $this->assertCount(1, $messages);
@@ -120,7 +128,8 @@ final class tasks_test extends \advanced_testcase {
      * The nightly recalculation notifies once when the Ampel turns yellow or red.
      */
     public function test_recalculate_ampel_notifies_once(): void {
-        courseconfig::save($this->course->id, [], true, []);
+        // Course settings mark the course as a GoPilot course for the nightly task.
+        \local_gopilot\local\courseconfig::save($this->course->id, true, []);
         $sink = $this->redirectMessages();
         ob_start();
         (new recalculate_ampel())->execute();

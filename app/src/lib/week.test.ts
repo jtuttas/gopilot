@@ -5,8 +5,6 @@ import {
   isoWeek,
   mondayOf,
   relativeWeekLabel,
-  schoolYearOf,
-  schoolYearWeeks,
   weekRangeLabel,
   weekTitle,
 } from './week'
@@ -55,16 +53,5 @@ describe('Wochen-Helfer', () => {
     expect(weekTitle('2026-12-28')).toBe('KW 53 · 28.12.–03.01.2027')
     expect(relativeWeekLabel('2026-11-09', '2026-11-02')).toBe('Nächste Woche')
     expect(relativeWeekLabel('2026-10-26', '2026-11-02')).toBe('Letzte Woche')
-  })
-
-  it('liefert die Wochen eines Schuljahres (Aug–Jul)', () => {
-    expect(schoolYearOf(new Date(2026, 10, 3))).toBe(2026)
-    expect(schoolYearOf(new Date(2027, 6, 31))).toBe(2026)
-    expect(schoolYearOf(new Date(2027, 7, 1))).toBe(2027)
-    const weeks = schoolYearWeeks(2026)
-    expect(weeks[0]).toBe('2026-07-27') // Woche mit dem 1. August
-    expect(weeks[weeks.length - 1]).toBe('2027-07-26') // Woche mit dem 31. Juli
-    expect(weeks).toContain('2026-12-28')
-    expect(weeks.every(isMonday)).toBe(true)
   })
 })

@@ -20,7 +20,7 @@ import { useNavigate, useParams } from 'react-router'
 import { errorMessage } from '../api/client'
 import { api } from '../api/functions'
 import { queryKeys, useOverview, useSavePlan, useWeek } from '../api/hooks'
-import type { OverviewCourse, PathsResponse, Week } from '../api/types'
+import type { PathsResponse, Week } from '../api/types'
 import { Notice } from '../components/Notice'
 import { PageHeader } from '../components/PageHeader'
 import { ErrorAlert, Loading } from '../components/QueryState'
@@ -29,11 +29,10 @@ import { addWeeks, formatDate, isMonday, relativeWeekLabel, weekTitle } from '..
 
 interface EditorProps {
   week: Week
-  courses: OverviewCourse[]
   paths: PathsResponse[]
 }
 
-function PlanEditor({ week, courses, paths }: EditorProps) {
+function PlanEditor({ week, paths }: EditorProps) {
   const [goal, setGoal] = useState(week.goal)
   const [selected, setSelected] = useState<Set<number>>(() => new Set(week.items.map((s) => s.cmid)))
   const [showDone, setShowDone] = useState(false)
@@ -88,18 +87,12 @@ function PlanEditor({ week, courses, paths }: EditorProps) {
       </Group>
 
       {paths.map((p) => {
-        const course = courses.find((c) => c.id === p.course.id)
         return (
           <Card key={p.course.id} withBorder radius="md" padding="sm">
             <Group justify="space-between" mb="xs" wrap="nowrap" gap="xs">
               <Text fw={600} size="sm">
                 {p.course.fullname}
               </Text>
-              {course && (
-                <Badge size="xs" variant="outline" color={course.isschoolweek ? 'blue' : 'gray'} style={{ flexShrink: 0 }}>
-                  {course.isschoolweek ? 'Schulwoche' : 'Betriebswoche'}
-                </Badge>
-              )}
             </Group>
             <Accordion multiple variant="contained" radius="md" defaultValue={p.paths.filter((x) => x.completed < x.total).map((x) => String(x.sectionid))}>
               {p.paths.map((path) => {
@@ -221,7 +214,6 @@ export function PlanPage() {
         <PlanEditor
           key={week}
           week={weekQuery.data}
-          courses={courses}
           paths={pathQueries.map((q) => q.data!).filter(Boolean)}
         />
       )}

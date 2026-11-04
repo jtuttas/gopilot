@@ -35,7 +35,7 @@ describe('Ampel-Darstellung', () => {
   })
 
   it('zeigt inaktive Signale neutral', () => {
-    const s: Signal = { key: 'plan', active: false, colour: 'red', value: 0, reason: 'Keine Schulwoche' }
+    const s: Signal = { key: 'plan', active: false, colour: 'red', value: 0, reason: 'Kein Lernschritt dieses Kurses geplant' }
     expect(signalColour(s)).toBe('none')
     expect(signalColour({ ...s, active: true })).toBe('red')
     expect(signalLabel('backlog')).toBe('Pfadrückstand')

@@ -33,9 +33,6 @@ function LearnerWeekCard({ week, courseid, userid }: { week: LearnerWeek; course
             {weekTitle(week.week)}
           </Title>
           <Group gap={6}>
-            <Badge variant="outline" color={week.isschoolweek ? 'blue' : 'gray'} size="sm">
-              {week.isschoolweek ? 'Schulwoche' : 'Betriebswoche'}
-            </Badge>
             {!week.closed && (
               <Badge variant="light" size="sm">
                 laufend

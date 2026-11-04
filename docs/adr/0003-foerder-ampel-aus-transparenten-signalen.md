@@ -29,9 +29,9 @@ Die Ampel ist ein Hinweis, keine Bewertung. Der Lerncoach sieht immer, welches S
 
   | Signal | grün | gelb | rot |
   |---|---|---|---|
-  | Planerfüllung (nur Schulwoche) | ≥ 70 % | 40–69 % | < 40 % |
+  | Planerfüllung (letzte Woche, nur wenn geplant) | ≥ 70 % | 40–69 % | < 40 % |
   | Pfadrückstand (überfällige Lernschritte) | 0–1 | 2–3 | ≥ 4 |
-  | Fehlende Reflexion (nur Schulwoche) | vorhanden | 1 Woche fehlt | 2 Schulwochen in Folge |
+  | Fehlende Reflexion (nur geplante Wochen, ADR 0008) | vorhanden | 1 Woche fehlt | 2 geplante Wochen in Folge |
   | Selbsteinschätzung (pro Lernpfad) | sicher / geht so | unsicher | komme nicht klar |
 
 - **Gesamtfarbe** eines Kurses = schlechtestes Signal (nicht konfigurierbar).
