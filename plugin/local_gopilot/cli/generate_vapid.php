@@ -17,7 +17,7 @@
 /**
  * Generate VAPID keys for Web Push and store them in the plugin settings.
  *
- * Usage: php local/gopilot/cli/generate_vapid.php [--subject=mailto:admin@example.com] [--force]
+ * Usage: php local/gopilot/cli/generate_vapid.php [--subject=mailto:ADMIN-ADDRESS] [--force]
  *
  * @package    local_gopilot
  * @copyright  2026 Jörg Tuttas
