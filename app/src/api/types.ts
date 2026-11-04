@@ -205,6 +205,12 @@ export interface PathMetaItem {
   level: number
 }
 
+/** One-time link from local_gopilot_get_moodle_link (automatic Moodle login). */
+export interface MoodleLink {
+  url: string
+  validuntil: number
+}
+
 export interface PushConfig {
   enabled: boolean
   publickey: string

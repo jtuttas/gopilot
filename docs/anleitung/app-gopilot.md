@@ -40,7 +40,7 @@ Die Startseite zeigt die laufende Kalenderwoche mit deinem Wochenziel und den ge
 ![Startseite mit der aktuellen Woche](img-app/a02-start-woche.png)
 
 - **Abhaken:** Lernschritte, die du selbst als erledigt markieren darfst, hakst du direkt hier ab. Das landet auch in Moodle. Abgaben und Tests setzt Moodle automatisch auf erledigt, sobald die Bedingung erfüllt ist.
-- **In Moodle öffnen:** Das Pfeil-Symbol rechts öffnet die Aktivität in Moodle in einem neuen Tab.
+- **In Moodle öffnen:** Das Pfeil-Symbol rechts öffnet die Aktivität in Moodle in einem neuen Tab. Du wirst dabei automatisch in Moodle angemeldet und musst dein Kennwort nicht noch einmal eingeben.
 - Hast du noch nichts geplant, erscheint oben der Hinweis **Woche planen**. Ab Freitag erinnert dich GoPilot ans **Reflektieren**.
 
 Weiter unten stehen **Deine Kurse** mit Kursfortschritt und Förder-Ampel:

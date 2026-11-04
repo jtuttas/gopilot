@@ -197,6 +197,16 @@ Parameter: `courseid` int, `items` list of: `type` string (`section` oder `cm`),
 
 Rückgabe: `success` bool.
 
+## Moodle öffnen (Capability: angemeldet)
+
+### `local_gopilot_get_moodle_link`
+
+Parameter: `url` string (Moodle-Seite, z. B. `step.url`).
+
+Rückgabe: `url` string (Link auf `{moodle}/local/gopilot/autologin.php?userid=…&key=…&urltogo=…`), `validuntil` int.
+
+Der Link meldet die Person beim Öffnen im Browser in Moodle an und leitet auf `url` weiter (ADR 0007). Der Schlüssel gilt einmal, 60 Sekunden lang und nur von der IP-Adresse, die ihn angefordert hat; ein neuer Aufruf ersetzt den alten Schlüssel. Fehler: `invalidmoodleurl` (Ziel außerhalb dieser Moodle-Instanz), `autologinnotforadmins` (Admins und Konten mit `moodle/site:config`), `autologinhttps` (Moodle ohne HTTPS; erlaubt nur für `localhost`). Die App fällt bei Fehlern auf den normalen Link zurück.
+
 ## Push (Capability: angemeldet)
 
 ### `local_gopilot_get_push_config`

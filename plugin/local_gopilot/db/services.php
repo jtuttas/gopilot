@@ -37,6 +37,7 @@ $gopilotfunctions = [
     'get_courseconfig' => ['Course configuration', 'read'],
     'save_courseconfig' => ['Save course configuration', 'write'],
     'save_pathmeta' => ['Save path metadata', 'write'],
+    'get_moodle_link' => ['One-time link that logs the user into Moodle', 'write'],
     'get_push_config' => ['Web Push configuration', 'read'],
     'register_push' => ['Register a Web Push subscription', 'write'],
     'unregister_push' => ['Remove a Web Push subscription', 'write'],

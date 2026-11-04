@@ -257,6 +257,8 @@ Erwartet ist JSON mit `currentweek` und den Kursen des Kontos.
 | Browser-Konsole: „No 'Access-Control-Allow-Origin' header“ | Proxy oder Firewall vor Moodle entfernt Header, oder falsche `VITE_MOODLE_URL` | `curl`-Test aus 5.1; Adresse beim Bauen prüfen |
 | Seite lädt, nach Neuladen einer Unterseite Fehler 404 | SPA-Fallback fehlt | 4.3 |
 | Nach einem Update zeigt die App weiter die alte Version | `index.html` oder `sw.js` werden gecacht | Cache-Header aus 4.3; App einmal schließen und neu öffnen |
+| „In Moodle öffnen“ fragt doch nach dem Kennwort | Moodle läuft ohne HTTPS, Konto ist Admin, oder Plugin älter als 0.3.0 | HTTPS einrichten; mit normalem Konto nutzen; Plugin aktualisieren (7) |
+| „In Moodle öffnen“ zeigt „Bereits angemeldet als …“ | Im selben Browser ist schon eine andere Person in Moodle angemeldet | dort abmelden, dann den Link erneut öffnen |
 | Push lässt sich nicht einschalten („nicht eingerichtet“) | VAPID-Schlüssel fehlen | 3.3 |
 | Push eingeschaltet, kommt aber nicht an | Moodle-Server darf nicht nach außen; auf dem iPhone App nicht installiert | Firewall-Freigabe (Abschnitt 1); in Safari „Zum Home-Bildschirm“ |
 | Keine Erinnerungen, Ampeln über Nacht unverändert | Moodle-Cron läuft nicht | Cron einrichten, unter **Geplante Aufgaben** „Letzter Lauf“ prüfen |

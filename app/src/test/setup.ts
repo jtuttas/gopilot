@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
+
+// findBy*/waitFor: the full app renders slowly when many test files run in parallel.
+configure({ asyncUtilTimeout: 5000 })
 
 // jsdom lacks a few browser APIs Mantine relies on.
 Object.defineProperty(window, 'matchMedia', {

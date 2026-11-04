@@ -6,6 +6,7 @@ import type {
   FeedbackEntry,
   LearnerDetail,
   Lerndoku,
+  MoodleLink,
   Overview,
   PathMetaItem,
   PathsResponse,
@@ -73,6 +74,9 @@ export const api = {
       courseid,
       items: items.map((i) => ({ ...i })),
     }),
+
+  /** One-time link that logs the user into Moodle and opens `url` there. */
+  getMoodleLink: (url: string) => call<MoodleLink>('local_gopilot_get_moodle_link', { url }),
 
   getPushConfig: () => call<PushConfig>('local_gopilot_get_push_config'),
 

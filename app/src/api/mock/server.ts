@@ -581,6 +581,9 @@ const handlers: Record<string, Handler> = {
     return { success: true }
   },
 
+  // No real Moodle session in mock mode: the link is the target itself.
+  local_gopilot_get_moodle_link: (_userid, p) => ({ url: str(p.url), validuntil: Math.floor(Date.now() / 1000) + 60 }),
+
   local_gopilot_get_push_config: () => ({
     enabled: true,
     publickey: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U',

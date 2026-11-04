@@ -69,6 +69,7 @@ class provider implements
             $collection->add_database_table($table, $described, 'privacy:metadata:' . $table);
         }
         $collection->add_subsystem_link('core_message', [], 'privacy:metadata:core_message');
+        $collection->add_subsystem_link('core_userkey', [], 'privacy:metadata:core_userkey');
         $collection->add_external_location_link('webpush', [
             'title' => 'privacy:metadata:webpush:title',
             'body' => 'privacy:metadata:webpush:body',
@@ -306,6 +307,7 @@ class provider implements
         $DB->delete_records('local_gopilot_feedback', ['authorid' => $userid]);
         $DB->delete_records('local_gopilot_ampel', ['userid' => $userid]);
         $DB->delete_records('local_gopilot_pushsub', ['userid' => $userid]);
+        \core_userkey\privacy\provider::delete_userkeys(\local_gopilot\local\autologin::SCRIPT, $userid);
     }
 
     /**

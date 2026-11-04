@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react'
 import { ActionIcon, Badge, Checkbox, Group, Stack, Text, ThemeIcon, Tooltip } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import {
@@ -12,6 +13,7 @@ import type { Meta, Step } from '../api/types'
 import { LEVEL_LABELS } from '../lib/ampel'
 import { formatDate } from '../lib/week'
 import { formatDuration, modLabel } from '../lib/format'
+import { openInMoodle } from '../lib/moodle'
 
 export function MetaBadges({ meta }: { meta: Meta }) {
   const parts: string[] = []
@@ -117,6 +119,12 @@ export function StepItem({ step, canTick = true, showMeta = true, courseName }: 
           href={step.url}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e: MouseEvent) => {
+            // Plain clicks log in automatically; modifier clicks keep the browser's own behaviour.
+            if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return
+            e.preventDefault()
+            void openInMoodle(step.url)
+          }}
           variant="subtle"
           aria-label={`${step.name} in Moodle öffnen (neuer Tab)`}
         >
