@@ -147,6 +147,7 @@ Rückgabe: `course` (`id`, `fullname`), `currentweek` string, `isschoolweek` boo
 | `progress` | `completed`, `total` |
 | `lastreflection` | `week` string (leer = nie), `text` string (Kursreflexion, auf 200 Zeichen gekürzt) |
 | `unreadfeedback` | int (0 in V1, reserviert) |
+| `cohorts` | list of `id` int, `name` string: sichtbare globale Gruppen (z. B. Klassen), nach Name sortiert; leer = keine |
 
 Lernende = alle mit `use` im Kurs.
 

@@ -24,6 +24,8 @@ import { ampelDisplay, sortLearners } from '../lib/ampel'
 import { weekLabel, weekTitle } from '../lib/week'
 
 const COLOURS: AmpelColour[] = ['red', 'yellow', 'green', 'none']
+/** Filter value for learners without a global group. */
+const NO_COHORT = 'none'
 
 function CoursePicker({ value }: { value?: number }) {
   const overview = useOverview()
@@ -64,13 +66,32 @@ export function LerndokuPage() {
   const [sortBy, setSortBy] = useState<'ampel' | 'name'>('ampel')
   const [colours, setColours] = useState<string[]>(COLOURS)
   const [search, setSearch] = useState('')
+  const [cohort, setCohort] = useState<string | null>(null)
 
   const learners = useMemo(() => {
     const q = search.trim().toLowerCase()
     return sortLearners(doku.data?.learners ?? [], sortBy).filter(
-      (l) => colours.includes(l.ampel.colour) && (!q || l.fullname.toLowerCase().includes(q)),
+      (l) =>
+        colours.includes(l.ampel.colour) &&
+        (!q || l.fullname.toLowerCase().includes(q)) &&
+        (!cohort ||
+          (cohort === NO_COHORT ? l.cohorts.length === 0 : l.cohorts.some((c) => String(c.id) === cohort))),
     )
-  }, [doku.data, sortBy, colours, search])
+  }, [doku.data, sortBy, colours, search, cohort])
+
+  const cohortOptions = useMemo(() => {
+    const all = doku.data?.learners ?? []
+    const byId = new Map<number, { name: string; count: number }>()
+    for (const l of all) {
+      for (const c of l.cohorts) byId.set(c.id, { name: c.name, count: (byId.get(c.id)?.count ?? 0) + 1 })
+    }
+    const options = [...byId.entries()]
+      .sort(([, a], [, b]) => a.name.localeCompare(b.name, 'de'))
+      .map(([id, c]) => ({ value: String(id), label: `${c.name} (${c.count})` }))
+    const without = all.filter((l) => l.cohorts.length === 0).length
+    if (options.length > 0 && without > 0) options.push({ value: NO_COHORT, label: `Ohne globale Gruppe (${without})` })
+    return options
+  }, [doku.data])
 
   const canConfigure = overview.data?.courses.find((c) => c.id === courseid)?.canconfigure
 
@@ -107,6 +128,18 @@ export function LerndokuPage() {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={200}
           />
+          {cohortOptions.length > 0 && (
+            <Select
+              label="Klasse"
+              placeholder="Alle"
+              data={cohortOptions}
+              value={cohort}
+              onChange={setCohort}
+              clearable
+              searchable
+              w={240}
+            />
+          )}
           <Stack gap={4}>
             <Text size="sm" fw={500} id="sort-label">
               Sortierung
@@ -142,12 +175,13 @@ export function LerndokuPage() {
         </Text>
       </Stack>
 
-      <Table.ScrollContainer minWidth={860}>
+      <Table.ScrollContainer minWidth={960}>
         <Table striped highlightOnHover verticalSpacing="sm">
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Ampel</Table.Th>
               <Table.Th>Name</Table.Th>
+              <Table.Th>Klasse</Table.Th>
               <Table.Th>Signale</Table.Th>
               <Table.Th>Fortschritt</Table.Th>
               <Table.Th>Letzte Kursreflexion</Table.Th>
@@ -156,7 +190,7 @@ export function LerndokuPage() {
           <Table.Tbody>
             {learners.length === 0 && (
               <Table.Tr>
-                <Table.Td colSpan={5}>
+                <Table.Td colSpan={6}>
                   <Text size="sm" c="dimmed">
                     Keine Lernenden für diese Auswahl.
                   </Text>
@@ -167,13 +201,22 @@ export function LerndokuPage() {
               const pct = l.progress.total ? Math.round((l.progress.completed / l.progress.total) * 100) : 0
               return (
                 <Table.Tr key={l.userid}>
-                  <Table.Td style={{ whiteSpace: 'nowrap' }}>
+                  <Table.Td miw={130} style={{ whiteSpace: 'nowrap' }}>
                     <AmpelBadge colour={l.ampel.colour} size="sm" />
                   </Table.Td>
                   <Table.Td style={{ whiteSpace: 'nowrap' }}>
                     <Anchor component={Link} to={`/lerndoku/${courseid}/${l.userid}`} fw={600} size="sm">
                       {l.fullname}
                     </Anchor>
+                  </Table.Td>
+                  <Table.Td maw={180}>
+                    {l.cohorts.length > 0 ? (
+                      <Text size="sm">{l.cohorts.map((c) => c.name).join(', ')}</Text>
+                    ) : (
+                      <Text size="xs" c="dimmed">
+                        keine
+                      </Text>
+                    )}
                   </Table.Td>
                   <Table.Td miw={230}>
                     <Group gap={4} wrap="wrap">

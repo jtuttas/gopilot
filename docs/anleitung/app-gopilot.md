@@ -144,6 +144,7 @@ Die Lerndoku zeigt alle Lernenden eines Kurses mit Förder-Ampel, den vier Signa
 
 - **Sortierung:** Standardmäßig steht Rot oben, alternativ nach Name.
 - **Filter:** Über die Ampelfarben blenden Sie z. B. nur Lernende mit Rot ein. Über **Suche** finden Sie einzelne Namen.
+- **Klasse:** Sind die Lernenden in Moodle globalen Gruppen zugeordnet (z. B. ihrer Klasse), zeigt die Spalte **Klasse** diese Gruppen. Über das Auswahlfeld **Klasse** sehen Sie nur die Lernenden einer globalen Gruppe oder mit **Ohne globale Gruppe** alle, die keiner zugeordnet sind.
 - **Signale:** Fahren Sie mit der Maus über ein Signal, um die Begründung zu sehen, z. B. „Pfadrückstand: Gelb – 3 Lernschritte überfällig“.
 - Ein Klick auf den Namen öffnet die Detailansicht.
 

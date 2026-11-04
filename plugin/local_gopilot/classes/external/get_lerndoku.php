@@ -71,6 +71,7 @@ class get_lerndoku extends external_api {
                   JOIN {local_gopilot_week} w ON w.id = cr.weekid
                  WHERE w.userid = :userid AND cr.courseid = :courseid
               ORDER BY w.week DESC";
+        $cohorts = self::cohorts(array_keys($users));
         $learners = [];
         foreach ($users as $user) {
             $last = ['week' => '', 'text' => ''];
@@ -87,6 +88,7 @@ class get_lerndoku extends external_api {
                 'progress' => $steps->progress($courseid, $user->id),
                 'lastreflection' => $last,
                 'unreadfeedback' => 0,
+                'cohorts' => $cohorts[$user->id] ?? [],
             ];
         }
         return [
@@ -95,6 +97,33 @@ class get_lerndoku extends external_api {
             'isschoolweek' => (new courseconfig($courseid))->is_schoolweek($current),
             'learners' => $learners,
         ];
+    }
+
+    /**
+     * Visible cohorts (global groups, e.g. classes) of the learners.
+     *
+     * @param int[] $userids
+     * @return array userid => list of ['id' => int, 'name' => string], sorted by name
+     */
+    protected static function cohorts(array $userids): array {
+        global $DB;
+        $result = [];
+        foreach (array_chunk($userids, 500) as $chunk) {
+            [$insql, $params] = $DB->get_in_or_equal($chunk, SQL_PARAMS_NAMED);
+            $sql = "SELECT cm.id, cm.userid, c.id AS cohortid, c.name, c.contextid
+                      FROM {cohort_members} cm
+                      JOIN {cohort} c ON c.id = cm.cohortid
+                     WHERE c.visible = 1 AND cm.userid $insql
+                  ORDER BY c.name ASC, c.id ASC";
+            foreach ($DB->get_records_sql($sql, $params) as $row) {
+                $context = \context::instance_by_id($row->contextid, IGNORE_MISSING) ?: \context_system::instance();
+                $result[(int)$row->userid][] = [
+                    'id' => (int)$row->cohortid,
+                    'name' => format_string($row->name, true, ['context' => $context]),
+                ];
+            }
+        }
+        return $result;
     }
 
     /**
@@ -117,6 +146,10 @@ class get_lerndoku extends external_api {
                     'text' => new external_value(PARAM_TEXT, 'Course reflection, max. 200 characters'),
                 ]),
                 'unreadfeedback' => new external_value(PARAM_INT, 'Reserved, 0 in version 1'),
+                'cohorts' => new external_multiple_structure(new external_single_structure([
+                    'id' => new external_value(PARAM_INT, 'Cohort id'),
+                    'name' => new external_value(PARAM_TEXT, 'Cohort name, e.g. the class'),
+                ]), 'Visible cohorts (global groups) of the learner, sorted by name'),
             ])),
         ]);
     }

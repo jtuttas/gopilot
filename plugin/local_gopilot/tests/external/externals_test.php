@@ -396,6 +396,13 @@ final class externals_test extends \externallib_advanced_testcase {
             ['courseid' => $this->coursea->id, 'reflection' => str_repeat('x', 250), 'selfassessments' => []],
         ]]);
 
+        global $CFG;
+        require_once($CFG->dirroot . '/cohort/lib.php');
+        $class = $this->getDataGenerator()->create_cohort(['name' => 'FIAE24A']);
+        $hidden = $this->getDataGenerator()->create_cohort(['name' => 'Versteckt', 'visible' => 0]);
+        cohort_add_member($class->id, $this->learner->id);
+        cohort_add_member($hidden->id, $this->learner->id);
+
         $this->setUser($this->teachera);
         $result = $this->call('get_lerndoku', [$this->coursea->id]);
         $this->assertSame(weeks::current(), $result['currentweek']);
@@ -405,6 +412,9 @@ final class externals_test extends \externallib_advanced_testcase {
         $this->assertSame(200, \core_text::strlen($row['lastreflection']['text']));
         $this->assertSame(0, $row['unreadfeedback']);
         $this->assertSame(3, $row['progress']['total']);
+        $this->assertSame([['id' => (int)$class->id, 'name' => 'FIAE24A']], $row['cohorts']);
+        $other = $result['learners'][1 - array_search($row, $result['learners'], true)];
+        $this->assertSame([], $other['cohorts'], 'Learner without global group');
 
         $this->setUser($this->learner);
         $this->expectException(\required_capability_exception::class);

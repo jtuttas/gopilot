@@ -10,6 +10,8 @@ export interface MockUser {
   id: number
   username: string
   fullname: string
+  /** Global groups (cohorts), e.g. the class. */
+  cohorts?: { id: number; name: string }[]
 }
 
 export interface MockStep {
@@ -304,8 +306,8 @@ export function createMockDb(today: Date = new Date()): MockDb {
     currentWeek: C,
     users: [
       { id: LENA, username: 'lena', fullname: 'Lena Lehrkraft' },
-      { id: ADA, username: 'ada', fullname: 'Ada Azubi' },
-      { id: BEN, username: 'ben', fullname: 'Ben Azubi' },
+      { id: ADA, username: 'ada', fullname: 'Ada Azubi', cohorts: [{ id: 1, name: 'FIAE24A' }] },
+      { id: BEN, username: 'ben', fullname: 'Ben Azubi', cohorts: [{ id: 2, name: 'FIAE24B' }] },
       { id: CAN, username: 'can', fullname: 'Can Azubi' },
     ],
     courses,

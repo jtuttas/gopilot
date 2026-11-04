@@ -137,6 +137,8 @@ export interface LerndokuLearner {
   progress: Progress
   lastreflection: { week: WeekString; text: string }
   unreadfeedback: number
+  /** Visible cohorts (global groups, e.g. classes), sorted by name; empty = none. */
+  cohorts: { id: number; name: string }[]
 }
 
 export interface Lerndoku {

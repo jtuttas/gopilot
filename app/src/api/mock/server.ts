@@ -496,6 +496,7 @@ const handlers: Record<string, Handler> = {
           progress: progressOf(lid, c),
           lastreflection: last ? { week: last[0], text: last[1].reflections[c.id].slice(0, 200) } : { week: '', text: '' },
           unreadfeedback: 0,
+          cohorts: u.cohorts ?? [],
         }
       }),
     }

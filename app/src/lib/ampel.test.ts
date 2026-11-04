@@ -16,6 +16,7 @@ const learner = (fullname: string, colour: LerndokuLearner['ampel']['colour']): 
   progress: { completed: 0, total: 0 },
   lastreflection: { week: '', text: '' },
   unreadfeedback: 0,
+  cohorts: [],
 })
 
 describe('Ampel-Darstellung', () => {
