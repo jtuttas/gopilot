@@ -37,7 +37,7 @@ class sender {
     /**
      * Turn a contact into a valid VAPID subject (RFC 8292 needs a mailto: or https: URI).
      *
-     * A bare e-mail address such as "admin@example.org" gets the missing "mailto:" prefix.
+     * A bare e-mail address (no scheme, contains an at sign) gets the missing "mailto:" prefix.
      *
      * @param string $subject contact as entered by the admin
      * @return string normalised subject, empty if none was given
