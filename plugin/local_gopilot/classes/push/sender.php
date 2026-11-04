@@ -35,13 +35,29 @@ class sender {
     }
 
     /**
+     * Turn a contact into a valid VAPID subject (RFC 8292 needs a mailto: or https: URI).
+     *
+     * A bare e-mail address such as "admin@example.org" gets the missing "mailto:" prefix.
+     *
+     * @param string $subject contact as entered by the admin
+     * @return string normalised subject, empty if none was given
+     */
+    public static function normalise_subject(string $subject): string {
+        $subject = trim($subject);
+        if ($subject !== '' && strpos($subject, ':') === false && strpos($subject, '@') !== false) {
+            return 'mailto:' . $subject;
+        }
+        return $subject;
+    }
+
+    /**
      * VAPID subject (contact), configured or derived from the site.
      *
      * @return string
      */
     public static function subject(): string {
         global $CFG;
-        $subject = trim((string)get_config('local_gopilot', 'vapidsubject'));
+        $subject = self::normalise_subject((string)get_config('local_gopilot', 'vapidsubject'));
         if ($subject !== '') {
             return $subject;
         }

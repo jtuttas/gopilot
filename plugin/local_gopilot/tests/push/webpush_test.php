@@ -114,6 +114,20 @@ final class webpush_test extends \advanced_testcase {
     }
 
     /**
+     * A bare e-mail address becomes a mailto: subject; valid subjects stay unchanged.
+     */
+    public function test_subject_normalisation(): void {
+        $this->resetAfterTest();
+        $this->assertSame('mailto:admin@example.org', sender::normalise_subject(' admin@example.org '));
+        $this->assertSame('mailto:admin@example.org', sender::normalise_subject('mailto:admin@example.org'));
+        $this->assertSame('https://moodle.example.org', sender::normalise_subject('https://moodle.example.org'));
+        $this->assertSame('', sender::normalise_subject('  '));
+
+        set_config('vapidsubject', 'admin@example.org', 'local_gopilot');
+        $this->assertSame('mailto:admin@example.org', sender::subject());
+    }
+
+    /**
      * The sender posts to every subscription and deletes gone subscriptions (404/410).
      */
     public function test_sender_removes_gone_subscriptions(): void {

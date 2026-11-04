@@ -44,6 +44,12 @@ Options:
     exit(0);
 }
 
+$subject = \local_gopilot\push\sender::normalise_subject($options['subject']);
+if ($subject !== '') {
+    set_config('vapidsubject', $subject, 'local_gopilot');
+    cli_writeln('VAPID subject stored: ' . $subject);
+}
+
 if (\local_gopilot\push\sender::is_enabled() && !$options['force']) {
     cli_writeln('VAPID keys exist already. Use --force to replace them.');
     exit(0);
@@ -52,7 +58,4 @@ if (\local_gopilot\push\sender::is_enabled() && !$options['force']) {
 $keys = \local_gopilot\push\vapid::generate_keys();
 set_config('vapidpublickey', $keys['publickey'], 'local_gopilot');
 set_config('vapidprivatekey', $keys['privatekey'], 'local_gopilot');
-if ($options['subject'] !== '') {
-    set_config('vapidsubject', $options['subject'], 'local_gopilot');
-}
 cli_writeln('VAPID keys stored. Public key: ' . $keys['publickey']);
