@@ -9,8 +9,9 @@ import {
 } from './ampel'
 import { validateThresholds } from './thresholds'
 
+let nextId = 1
 const learner = (fullname: string, colour: LerndokuLearner['ampel']['colour']): LerndokuLearner => ({
-  userid: fullname.length,
+  userid: nextId++,
   fullname,
   ampel: { courseid: 1, colour, timecomputed: 0, signals: [] },
   progress: { completed: 0, total: 0 },
@@ -41,10 +42,29 @@ describe('Ampel-Darstellung', () => {
     expect(signalLabel('backlog')).toBe('Pfadrückstand')
   })
 
-  it('sortiert Rot zuerst, dann nach Name', () => {
-    const list = [learner('Ada', 'green'), learner('Can', 'red'), learner('Ben', 'yellow'), learner('Bea', 'red'), learner('Dora', 'none')]
-    expect(sortLearners(list, 'ampel').map((l) => l.fullname)).toEqual(['Bea', 'Can', 'Ben', 'Ada', 'Dora'])
-    expect(sortLearners(list, 'name').map((l) => l.fullname)).toEqual(['Ada', 'Bea', 'Ben', 'Can', 'Dora'])
+  it('sortiert Rot zuerst, dann nach Nachname (Reihenfolge des Plugins)', () => {
+    // Wie vom Plugin geliefert: nach Nachname, dann Vorname.
+    const list = [
+      learner('Zoe Adam', 'green'),
+      learner('Can Berg', 'red'),
+      learner('Ben Cramer', 'yellow'),
+      learner('Ada Diaz', 'red'),
+      learner('Dora Ernst', 'none'),
+    ]
+    expect(sortLearners(list, 'ampel').map((l) => l.fullname)).toEqual([
+      'Can Berg',
+      'Ada Diaz',
+      'Ben Cramer',
+      'Zoe Adam',
+      'Dora Ernst',
+    ])
+    expect(sortLearners(list, 'name').map((l) => l.fullname)).toEqual([
+      'Zoe Adam',
+      'Can Berg',
+      'Ben Cramer',
+      'Ada Diaz',
+      'Dora Ernst',
+    ])
   })
 
   it('benennt die Stufen der Selbsteinschätzung', () => {

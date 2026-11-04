@@ -98,9 +98,15 @@ export const LEVEL_LABELS: Record<number, string> = {
   3: 'Experte',
 }
 
-/** Lerndoku order: by Ampel (red first, then by name) or by name only. */
+/**
+ * Lerndoku order: by Ampel (red first, then by name) or by name only.
+ *
+ * "By name" keeps the order of `list`: the plugin sends the learners sorted by last name, then first
+ * name. `fullname` starts with the first name, so sorting by it would sort by first name.
+ */
 export function sortLearners(list: LerndokuLearner[], by: 'ampel' | 'name'): LerndokuLearner[] {
-  const byName = (a: LerndokuLearner, b: LerndokuLearner) => a.fullname.localeCompare(b.fullname, 'de')
+  const position = new Map(list.map((l, i) => [l.userid, i]))
+  const byName = (a: LerndokuLearner, b: LerndokuLearner) => position.get(a.userid)! - position.get(b.userid)!
   return [...list].sort((a, b) =>
     by === 'ampel' ? compareAmpel(a.ampel.colour, b.ampel.colour) || byName(a, b) : byName(a, b),
   )
