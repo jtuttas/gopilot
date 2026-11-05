@@ -252,7 +252,8 @@ final class calculator_test extends \advanced_testcase {
     }
 
     /**
-     * Backlog: only steps with a passed date that are not completed; steps without a date never count.
+     * Backlog: only tracked steps with a passed date that are not completed; steps without a date
+     * or without completion tracking never count.
      */
     public function test_backlog_counts_overdue_steps(): void {
         $past = $this->now - DAYSECS;
@@ -261,10 +262,31 @@ final class calculator_test extends \advanced_testcase {
         $this->page($past);
         $this->page(0);
         $this->page($this->now + DAYSECS);
+        $this->getDataGenerator()->create_module('page', [
+            'course' => $this->course->id, 'section' => 1,
+            'completion' => COMPLETION_TRACKING_NONE, 'completionexpected' => $past,
+        ]);
         $signal = $this->signal('backlog');
         $this->assertTrue($signal['active']);
         $this->assertSame(1, $signal['value']);
         $this->assertSame('green', $signal['colour']);
+        $this->assertSame(
+            get_string('signal_backlog_reason', 'local_gopilot', (object)['open' => 1, 'due' => 2]),
+            $signal['reason']
+        );
+    }
+
+    /**
+     * Backlog: all due steps completed.
+     */
+    public function test_backlog_all_done(): void {
+        $past = $this->now - DAYSECS;
+        $this->complete($this->page($past), $past);
+        $signal = $this->signal('backlog');
+        $this->assertSame(0, $signal['value']);
+        $this->assertSame(get_string('signal_backlog_onedone', 'local_gopilot'), $signal['reason']);
+        $this->complete($this->page($past), $past);
+        $this->assertSame(get_string('signal_backlog_alldone', 'local_gopilot', 2), $this->signal('backlog')['reason']);
     }
 
     /**

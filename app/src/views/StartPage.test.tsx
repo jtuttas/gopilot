@@ -25,7 +25,7 @@ describe('Startseite', () => {
     expect(within(lf5).getByText('Ampel Grün')).toBeInTheDocument()
     expect(within(lf5).getAllByText('Hinweis, keine Bewertung').length).toBeGreaterThan(0)
     expect(within(lf5).getByText('2 von 2 geplanten Lernschritten erledigt (100 %)')).toBeInTheDocument()
-    expect(within(lf5).getByText('Keine überfälligen Lernschritte')).toBeInTheDocument()
+    expect(within(lf5).getByText(/fälligen Lernschritte erledigt$/)).toBeInTheDocument()
   })
 
   it('zeigt Gelb und Rot unterstützend formuliert', async () => {
@@ -42,7 +42,7 @@ describe('Startseite', () => {
       'href',
       '/reflexion/2026-10-26',
     )
-    expect(screen.getByText('4 Lernschritte überfällig')).toBeInTheDocument()
+    expect(screen.getByText(/^4 von \d+ fälligen Lernschritten noch offen$/)).toBeInTheDocument()
   })
 
   it('zeigt Lehrkräften ihre Kurse mit Link zur Lerndoku', async () => {

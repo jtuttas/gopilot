@@ -53,7 +53,7 @@ Die Ampel ist ein **Hinweis für dich, keine Note**. Nur du und die Lehrkräfte 
 | Signal | Worum es geht | Standard-Grenzen |
 |---|---|---|
 | **Planerfüllung** | Wie viele deiner geplanten Lernschritte hast du letzte Woche geschafft? | grün ab 70 %, gelb ab 40 %, darunter rot |
-| **Pfadrückstand** | Wie viele Lernschritte sind über ihren Soll-Termin hinaus noch offen? | 0–1 grün, 2–3 gelb, ab 4 rot |
+| **Pfadrückstand** | Wie viele Lernschritte sind über ihren Soll-Termin hinaus noch offen? Die Begründung nennt auch, wie viele schon fällig waren, z. B. „3 von 7 fälligen Lernschritten noch offen“. | 0–1 grün, 2–3 gelb, ab 4 rot |
 | **Reflexion** | Hast du die Wochen reflektiert, für die du etwas aus dem Kurs geplant hattest? | 1 fehlende Woche gelb, 2 in Folge rot |
 | **Selbsteinschätzung** | Wie sicher hast du dich zuletzt eingeschätzt? | „unsicher“ gelb, „komme nicht klar“ rot |
 
@@ -145,7 +145,7 @@ Die Lerndoku zeigt alle Lernenden eines Kurses mit Förder-Ampel, den vier Signa
 - **Sortierung:** Standardmäßig steht Rot oben, alternativ nach Name.
 - **Filter:** Über die Ampelfarben blenden Sie z. B. nur Lernende mit Rot ein. Über **Suche** finden Sie einzelne Namen.
 - **Klasse:** Sind die Lernenden in Moodle globalen Gruppen zugeordnet (z. B. ihrer Klasse), zeigt die Spalte **Klasse** diese Gruppen. Über das Auswahlfeld **Klasse** sehen Sie nur die Lernenden einer globalen Gruppe oder mit **Ohne globale Gruppe** alle, die keiner zugeordnet sind.
-- **Signale:** Fahren Sie mit der Maus über ein Signal, um die Begründung zu sehen, z. B. „Pfadrückstand: Gelb – 3 Lernschritte überfällig“.
+- **Signale:** Fahren Sie mit der Maus über ein Signal, um die Begründung zu sehen, z. B. „Pfadrückstand: Gelb – 3 von 7 fälligen Lernschritten noch offen“.
 - Ein Klick auf den Namen öffnet die Detailansicht.
 
 Die Ampel ist ein Gesprächsanlass, keine Bewertung, und fließt nicht in Noten ein. Lernende sehen nur ihre eigene Ampel.

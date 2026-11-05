@@ -274,13 +274,24 @@ function computeAmpel(userid: number, c: MockCourse): Ampel {
   }
 
   // 2. backlog
-  const overdue = allSteps(c).map((s) => toStep(userid, c, s)).filter((s) => s.overdue).length
+  const steps = allSteps(c).map((s) => toStep(userid, c, s))
+  const due = steps.filter((s) => s.tracked && s.expected > 0 && s.expected < db.now()).length
+  const overdue = steps.filter((s) => s.overdue).length
   signals.push({
     key: 'backlog',
     active: true,
     colour: colourAtLeast(overdue, th.backlogyellow, th.backlogred),
     value: overdue,
-    reason: overdue === 0 ? 'Keine überfälligen Lernschritte' : overdue === 1 ? '1 Lernschritt überfällig' : `${overdue} Lernschritte überfällig`,
+    reason:
+      due === 0
+        ? 'Noch kein Soll-Termin abgelaufen'
+        : due === 1
+          ? overdue
+            ? 'Der fällige Lernschritt ist noch offen'
+            : 'Der fällige Lernschritt ist erledigt'
+        : overdue === 0
+          ? `Alle ${due} fälligen Lernschritte erledigt`
+          : `${overdue} von ${due} fälligen Lernschritten noch offen`,
   })
 
   // 3. reflection

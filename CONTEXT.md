@@ -39,7 +39,7 @@ Frontend für Moodle zur Förderung des selbstgesteuerten Lernens, inspiriert vo
 | Förder-Ampel | Grün/Gelb/Rot pro Lernende:r und Kurs, Gesamtfarbe = schlechtestes Signal, aus transparenten Signalen berechnet; ein Hinweis, keine Note; Lernende sehen nur ihre eigene, der Lerncoach alle seiner Kurse | entschieden |
 | Signal | Einzelner Auslöser der Förder-Ampel: Planerfüllung, Pfadrückstand, fehlende Reflexion, Selbsteinschätzung | entschieden |
 | Planerfüllung | Anteil der im Wochenplan gewählten Lernschritte, die am Wochenende abgeschlossen sind | entschieden |
-| Pfadrückstand | Lernschritte, deren Soll-Termin verstrichen ist, die aber nicht abgeschlossen sind | entschieden |
+| Pfadrückstand | Lernschritte mit Abschlussverfolgung, deren Soll-Termin verstrichen ist, die aber nicht abgeschlossen sind; Lernschritte ohne Abschlussverfolgung zählen nie | entschieden |
 | Soll-Termin | Moodle-Einstellung „Abschluss erwartet am“ (`completionexpected`) bzw. Fälligkeitsdatum eines Lernschritts; ohne Termin kein Pfadrückstand-Signal | entschieden |
 | Selbsteinschätzung | In der Reflexion pro bearbeitetem Lernpfad: 4-stufige Skala (sicher, geht so, unsicher, komme nicht klar) plus optionaler Freitext; „unsicher“ = gelb, „komme nicht klar“ = rot | entschieden |
 | Schwellwerte | Grenzen, ab denen ein Signal gelb/rot wird; Standardwerte in ADR 0003, pro Kurs von der Lehrkraft anpassbar (außer Selbsteinschätzung) | entschieden |

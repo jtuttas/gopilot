@@ -87,7 +87,7 @@ Dazu kommen aus dem Moodle-Kern: `core_webservice_get_site_info` (eigene Person)
 Eine PHP-Klasse `\local_gopilot\ampel\calculator` berechnet für `(userid, courseid)` die vier Signale nach ADR 0003:
 
 1. **Planerfüllung:** Basis sind die geplanten Lernschritte dieses Kurses in der letzten abgeschlossenen Planungswoche.
-2. **Pfadrückstand:** Lernschritte des Kurses mit `completionexpected` bzw. Fälligkeitsdatum in der Vergangenheit, die nicht abgeschlossen sind.
+2. **Pfadrückstand:** Lernschritte des Kurses mit Abschlussverfolgung und `completionexpected` bzw. Fälligkeitsdatum in der Vergangenheit, die nicht abgeschlossen sind.
 3. **Fehlende Reflexion:** aufeinanderfolgende vergangene Wochen mit geplanten Lernschritten des Kurses, aber ohne Kursreflexion (ADR 0008).
 4. **Selbsteinschätzung:** schlechtester Wert der letzten Reflexion in diesem Kurs.
 

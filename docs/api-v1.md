@@ -28,7 +28,7 @@ Verbindliche Schnittstelle zwischen Plugin `local_gopilot` und App. Plugin (`cla
 | `completed` | bool | erledigt (inkl. bestanden) |
 | `manual` | bool | Lernende dürfen selbst abhaken (`COMPLETION_TRACKING_MANUAL`) |
 | `expected` | int | Soll-Termin: `completionexpected`, sonst Fälligkeitsdatum (`assign.duedate`, `quiz.timeclose`), sonst 0 |
-| `overdue` | bool | `expected > 0`, vorbei und nicht erledigt |
+| `overdue` | bool | `tracked`, `expected > 0`, vorbei und nicht erledigt (seit 0.4.1 nur mit Abschlussverfolgung) |
 | `meta` | `meta` | Pfad-Metadaten |
 
 Nur sichtbare, für die Person verfügbare Kursmodule, ohne Textfelder (`label`) und ohne Abschnitt 0.
@@ -230,7 +230,7 @@ Parameter: `endpoint` string. Rückgabe: `success` bool.
 Für `(userid, courseid)` zum Zeitpunkt der Berechnung:
 
 1. **`plan` (Planerfüllung):** Bezugswoche ist die zuletzt abgeschlossene Woche. Aktiv, wenn die Person darin mindestens einen Lernschritt dieses Kurses geplant hat. Wert = Anteil erledigter geplanter Schritte (erledigt bis Sonntag 23:59:59, also `completedatclose` bzw. `timemodified` des Abschlusses ≤ Wochenende), ganzzahlig gerundet. Grün ab `plangreen`, gelb ab `planyellow`, sonst rot. Begründung „4 von 6 geplanten Lernschritten erledigt (67 %)“. Inaktiv: „Kein Lernschritt dieses Kurses geplant“.
-2. **`backlog` (Pfadrückstand):** immer aktiv, wenn der Kurs Abschlussverfolgung hat. Wert = Anzahl `overdue`-Lernschritte im Kurs. Gelb ab `backlogyellow`, rot ab `backlogred`. Begründung „3 Lernschritte überfällig“ bzw. „Keine überfälligen Lernschritte“.
+2. **`backlog` (Pfadrückstand):** immer aktiv, wenn der Kurs Abschlussverfolgung hat. Wert = Anzahl `overdue`-Lernschritte im Kurs. Gelb ab `backlogyellow`, rot ab `backlogred`. Fällig sind Lernschritte mit Abschlussverfolgung, deren Soll-Termin vorbei ist. Begründung „3 von 7 fälligen Lernschritten noch offen“, „Alle 7 fälligen Lernschritte erledigt“ bzw. „Noch kein Soll-Termin abgelaufen“.
 3. **`reflection` (fehlende Reflexion):** Es zählen nur abgeschlossene Wochen, in denen die Person Lernschritte dieses Kurses geplant hat (ADR 0008). Wert = Anzahl dieser Wochen in Folge (von der neuesten rückwärts) ohne Kursreflexion. Gelb ab `reflectionyellow`, rot ab `reflectionred`. Inaktiv ohne solche Woche: „Noch keine abgeschlossene Woche mit geplanten Lernschritten“.
 4. **`selfassessment`:** aktiv, wenn es eine Woche mit Selbsteinschätzung (`level` > 0) in diesem Kurs gibt. Wert = schlechteste Stufe der neuesten solchen Woche. 1–2 grün, 3 gelb, 4 rot. Begründung „Selbsteinschätzung „unsicher“ in LS 5.2 (KW 45)“.
 

@@ -118,6 +118,8 @@ Dieselben Daten wertet GoPilot für die Lerndoku aus. Im Beispiel liegen zum Sti
 | Ben | 2 | 3 | gelb (2–3) |
 | Can | 0 | 5 | rot (ab 4) |
 
+Lernschritte ohne Abschlussbedingung zählen nie als Rückstand, auch wenn sie einen Termin haben: Lernende könnten sie gar nicht abschließen. In der App lautet die Begründung dann z. B. für Ben „3 von 5 fälligen Lernschritten noch offen“.
+
 ## Checkliste
 
 - [ ] Abschlussverfolgung im Kurs eingeschaltet

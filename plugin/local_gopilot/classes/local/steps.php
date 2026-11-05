@@ -208,7 +208,8 @@ class steps {
             'completed' => $completed,
             'manual' => (int)$cm->completion === COMPLETION_TRACKING_MANUAL,
             'expected' => $expected,
-            'overdue' => $expected > 0 && $expected < $this->now && !$completed,
+            // Steps without completion tracking can never be completed, so they are never overdue.
+            'overdue' => $tracked && $expected > 0 && $expected < $this->now && !$completed,
             'meta' => $this->meta($courseid, 'cm', (int)$cm->id),
         ];
     }

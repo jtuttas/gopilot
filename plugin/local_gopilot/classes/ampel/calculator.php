@@ -244,8 +244,13 @@ class calculator {
         if (!(new \completion_info($course))->is_enabled()) {
             return self::inactive('backlog', get_string('signal_backlog_nocompletion', 'local_gopilot'));
         }
+        // Due = tracked steps whose Soll-Termin has passed; overdue = those still open.
+        $due = 0;
         $overdue = 0;
         foreach ($this->steps->for_course($courseid, $userid) as $step) {
+            if ($step['tracked'] && $step['expected'] > 0 && $step['expected'] < $this->now) {
+                $due++;
+            }
             $overdue += $step['overdue'] ? 1 : 0;
         }
         if ($overdue >= $thresholds['backlogred']) {
@@ -255,12 +260,14 @@ class calculator {
         } else {
             $colour = 'green';
         }
-        if ($overdue == 0) {
+        if ($due == 0) {
             $reason = get_string('signal_backlog_none', 'local_gopilot');
-        } else if ($overdue == 1) {
-            $reason = get_string('signal_backlog_one', 'local_gopilot');
+        } else if ($due == 1) {
+            $reason = get_string($overdue ? 'signal_backlog_oneopen' : 'signal_backlog_onedone', 'local_gopilot');
+        } else if ($overdue == 0) {
+            $reason = get_string('signal_backlog_alldone', 'local_gopilot', $due);
         } else {
-            $reason = get_string('signal_backlog_reason', 'local_gopilot', $overdue);
+            $reason = get_string('signal_backlog_reason', 'local_gopilot', (object)['open' => $overdue, 'due' => $due]);
         }
         return self::active('backlog', $colour, $overdue, $reason);
     }
