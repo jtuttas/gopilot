@@ -395,6 +395,10 @@ final class externals_test extends \externallib_advanced_testcase {
         $this->call('save_reflection', [$week, '', [
             ['courseid' => $this->coursea->id, 'reflection' => str_repeat('x', 250), 'selfassessments' => []],
         ]]);
+        $this->call('save_plan', [weeks::current(), 'SQL lernen',
+            [$this->cmsa[0]->id, $this->cmsa[1]->id, $this->cmb->id]]);
+        $completion = new \completion_info($this->coursea);
+        $completion->update_state(\cm_info::create($this->cmsa[0]), COMPLETION_COMPLETE, $this->learner->id);
 
         global $CFG;
         require_once($CFG->dirroot . '/cohort/lib.php');
@@ -415,6 +419,8 @@ final class externals_test extends \externallib_advanced_testcase {
         $this->assertSame([['id' => (int)$class->id, 'name' => 'FIAE24A']], $row['cohorts']);
         $other = $result['learners'][1 - array_search($row, $result['learners'], true)];
         $this->assertSame([], $other['cohorts'], 'Learner without global group');
+        $this->assertSame(['goal' => 'SQL lernen', 'planned' => 2, 'completed' => 1, 'plannedall' => 3], $row['thisweek']);
+        $this->assertSame(['goal' => '', 'planned' => 0, 'completed' => 0, 'plannedall' => 0], $other['thisweek']);
 
         $this->setUser($this->learner);
         $this->expectException(\required_capability_exception::class);

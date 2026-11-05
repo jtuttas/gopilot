@@ -24,6 +24,7 @@ use core_external\external_single_structure;
 use core_external\external_value;
 use local_gopilot\ampel\calculator;
 use local_gopilot\local\steps;
+use local_gopilot\local\weekdata;
 use local_gopilot\local\weeks;
 
 /**
@@ -88,6 +89,7 @@ class get_lerndoku extends external_api {
                 'lastreflection' => $last,
                 'unreadfeedback' => 0,
                 'cohorts' => $cohorts[$user->id] ?? [],
+                'thisweek' => self::thisweek((int)$user->id, $courseid, $current, $steps),
             ];
         }
         return [
@@ -95,6 +97,36 @@ class get_lerndoku extends external_api {
             'currentweek' => $current,
             'learners' => $learners,
         ];
+    }
+
+    /**
+     * The learner's current week: goal and planned steps of this course.
+     *
+     * @param int $userid
+     * @param int $courseid
+     * @param string $week Monday of the current week
+     * @param steps $steps
+     * @return array
+     */
+    protected static function thisweek(int $userid, int $courseid, string $week, steps $steps): array {
+        global $DB;
+        $result = ['goal' => '', 'planned' => 0, 'completed' => 0, 'plannedall' => 0];
+        $record = weekdata::get_record($userid, $week);
+        if (!$record) {
+            return $result;
+        }
+        $result['goal'] = \core_text::substr(trim((string)$record->goal), 0, 200);
+        foreach ($DB->get_records('local_gopilot_planitem', ['weekid' => $record->id], '', 'id, courseid, cmid') as $item) {
+            $result['plannedall']++;
+            if ((int)$item->courseid !== $courseid) {
+                continue;
+            }
+            $result['planned']++;
+            if ($steps->is_completed($courseid, (int)$item->cmid, $userid)) {
+                $result['completed']++;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -147,6 +179,12 @@ class get_lerndoku extends external_api {
                     'id' => new external_value(PARAM_INT, 'Cohort id'),
                     'name' => new external_value(PARAM_TEXT, 'Cohort name, e.g. the class'),
                 ]), 'Visible cohorts (global groups) of the learner, sorted by name'),
+                'thisweek' => new external_single_structure([
+                    'goal' => new external_value(PARAM_TEXT, 'Weekly goal of the current week, max. 200 characters'),
+                    'planned' => new external_value(PARAM_INT, 'Planned steps of this course in the current week'),
+                    'completed' => new external_value(PARAM_INT, 'Of those, completed now'),
+                    'plannedall' => new external_value(PARAM_INT, 'Planned steps of all courses in the current week'),
+                ]),
             ])),
         ]);
     }

@@ -12,11 +12,11 @@ import {
   Text,
   TextInput,
 } from '@mantine/core'
-import { IconAdjustments, IconSearch } from '@tabler/icons-react'
+import { IconAdjustments, IconCalendarCheck, IconSearch, IconTarget } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { useLerndoku, useOverview } from '../api/hooks'
-import type { AmpelColour } from '../api/types'
+import type { AmpelColour, LerndokuThisWeek } from '../api/types'
 import { AmpelBadge, SignalBadge } from '../components/Ampel'
 import { PageHeader } from '../components/PageHeader'
 import { ErrorAlert, Loading } from '../components/QueryState'
@@ -26,6 +26,59 @@ import { weekLabel, weekTitle } from '../lib/week'
 const COLOURS: AmpelColour[] = ['red', 'yellow', 'green', 'none']
 /** Filter value for learners without a global group. */
 const NO_COHORT = 'none'
+
+type WeekFilter = 'plan' | 'noplan' | 'goal' | 'nogoal'
+const WEEK_FILTERS: { value: WeekFilter; label: string }[] = [
+  { value: 'plan', label: 'Mit Plan in diesem Kurs' },
+  { value: 'noplan', label: 'Ohne Plan in diesem Kurs' },
+  { value: 'goal', label: 'Mit Wochenziel' },
+  { value: 'nogoal', label: 'Ohne Wochenziel' },
+]
+
+function matchesWeek(w: LerndokuThisWeek | undefined, filter: WeekFilter | null): boolean {
+  if (!filter || !w) return true
+  if (filter === 'plan') return w.planned > 0
+  if (filter === 'noplan') return w.planned === 0
+  if (filter === 'goal') return w.goal !== ''
+  return w.goal === ''
+}
+
+/** Goal and plan of the current week for one learner. */
+function ThisWeekCell({ week }: { week: LerndokuThisWeek }) {
+  return (
+    <Stack gap={4}>
+      {week.planned > 0 ? (
+        <Badge
+          size="sm"
+          variant="light"
+          color={week.completed === week.planned ? 'teal' : 'blue'}
+          leftSection={<IconCalendarCheck size={12} aria-hidden />}
+          styles={{ label: { textTransform: 'none' } }}
+        >
+          {week.planned} geplant · {week.completed} erledigt
+        </Badge>
+      ) : (
+        <Text size="xs" c="dimmed">
+          {week.plannedall > 0
+            ? `nichts aus diesem Kurs geplant (${week.plannedall} aus anderen Kursen)`
+            : 'kein Wochenplan'}
+        </Text>
+      )}
+      {week.goal ? (
+        <Group gap={4} wrap="nowrap" align="flex-start">
+          <IconTarget size={14} aria-label="Wochenziel" style={{ flexShrink: 0, marginTop: 2 }} />
+          <Text size="xs" lineClamp={2} title={week.goal}>
+            {week.goal}
+          </Text>
+        </Group>
+      ) : (
+        <Text size="xs" c="dimmed">
+          kein Wochenziel
+        </Text>
+      )}
+    </Stack>
+  )
+}
 
 function CoursePicker({ value }: { value?: number }) {
   const overview = useOverview()
@@ -67,6 +120,7 @@ export function LerndokuPage() {
   const [colours, setColours] = useState<string[]>(COLOURS)
   const [search, setSearch] = useState('')
   const [cohort, setCohort] = useState<string | null>(null)
+  const [weekFilter, setWeekFilter] = useState<WeekFilter | null>(null)
 
   const learners = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -75,9 +129,10 @@ export function LerndokuPage() {
         colours.includes(l.ampel.colour) &&
         (!q || l.fullname.toLowerCase().includes(q)) &&
         (!cohort ||
-          (cohort === NO_COHORT ? l.cohorts.length === 0 : l.cohorts.some((c) => String(c.id) === cohort))),
+          (cohort === NO_COHORT ? l.cohorts.length === 0 : l.cohorts.some((c) => String(c.id) === cohort))) &&
+        matchesWeek(l.thisweek, weekFilter),
     )
-  }, [doku.data, sortBy, colours, search, cohort])
+  }, [doku.data, sortBy, colours, search, cohort, weekFilter])
 
   const cohortOptions = useMemo(() => {
     const all = doku.data?.learners ?? []
@@ -99,6 +154,9 @@ export function LerndokuPage() {
   if (doku.isError) return <ErrorAlert error={doku.error} onRetry={() => doku.refetch()} />
   const data = doku.data
   const counts = Object.fromEntries(COLOURS.map((c) => [c, data.learners.filter((l) => l.ampel.colour === c).length]))
+  const hasWeek = data.learners.some((l) => l.thisweek)
+  const withPlan = data.learners.filter((l) => (l.thisweek?.planned ?? 0) > 0).length
+  const withGoal = data.learners.filter((l) => l.thisweek?.goal).length
 
   return (
     <>
@@ -140,6 +198,17 @@ export function LerndokuPage() {
               w={240}
             />
           )}
+          {hasWeek && (
+            <Select
+              label="Diese Woche"
+              placeholder="Alle"
+              data={WEEK_FILTERS}
+              value={weekFilter}
+              onChange={(v) => setWeekFilter(v as WeekFilter | null)}
+              clearable
+              w={240}
+            />
+          )}
           <Stack gap={4}>
             <Text size="sm" fw={500} id="sort-label">
               Sortierung
@@ -169,19 +238,29 @@ export function LerndokuPage() {
             </Chip.Group>
           </Stack>
         </Group>
+        {hasWeek && data.learners.length > 0 && (
+          <Text size="sm" aria-live="polite">
+            <Text span fw={600} inherit>
+              {weekLabel(data.currentweek)}:
+            </Text>{' '}
+            {withPlan} von {data.learners.length} haben Lernschritte aus diesem Kurs geplant, {withGoal} von{' '}
+            {data.learners.length} haben ein Wochenziel.
+          </Text>
+        )}
         <Text size="xs" c="dimmed">
           Die Förder-Ampel ist ein Hinweis auf möglichen Unterstützungsbedarf, keine Bewertung, und fließt nicht in Noten ein.
           Fahre über ein Signal oder fokussiere es, um die Begründung zu sehen.
         </Text>
       </Stack>
 
-      <Table.ScrollContainer minWidth={960}>
+      <Table.ScrollContainer minWidth={hasWeek ? 1180 : 960}>
         <Table striped highlightOnHover verticalSpacing="sm">
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Ampel</Table.Th>
               <Table.Th>Name</Table.Th>
               <Table.Th>Klasse</Table.Th>
+              {hasWeek && <Table.Th>Diese Woche</Table.Th>}
               <Table.Th>Signale</Table.Th>
               <Table.Th>Fortschritt</Table.Th>
               <Table.Th>Letzte Kursreflexion</Table.Th>
@@ -190,7 +269,7 @@ export function LerndokuPage() {
           <Table.Tbody>
             {learners.length === 0 && (
               <Table.Tr>
-                <Table.Td colSpan={6}>
+                <Table.Td colSpan={hasWeek ? 7 : 6}>
                   <Text size="sm" c="dimmed">
                     Keine Lernenden für diese Auswahl.
                   </Text>
@@ -218,6 +297,11 @@ export function LerndokuPage() {
                       </Text>
                     )}
                   </Table.Td>
+                  {hasWeek && (
+                    <Table.Td miw={200} maw={260}>
+                      {l.thisweek && <ThisWeekCell week={l.thisweek} />}
+                    </Table.Td>
+                  )}
                   <Table.Td miw={230}>
                     <Group gap={4} wrap="wrap">
                       {l.ampel.signals.map((s) => (

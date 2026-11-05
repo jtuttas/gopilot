@@ -499,6 +499,8 @@ const handlers: Record<string, Handler> = {
       currentweek: db.currentWeek,
       learners: c.learners.map((lid) => {
         const u = db.users.find((x) => x.id === lid)!
+        const cw = db.weeks[lid]?.[db.currentWeek]
+        const plannedHere = planItems(lid, db.currentWeek, cw, c.id)
         const last = Object.entries(db.weeks[lid] ?? {})
           .filter(([, d]) => d.reflections[c.id])
           .sort(([a], [b]) => (a < b ? 1 : -1))[0]
@@ -510,6 +512,12 @@ const handlers: Record<string, Handler> = {
           lastreflection: last ? { week: last[0], text: last[1].reflections[c.id].slice(0, 200) } : { week: '', text: '' },
           unreadfeedback: 0,
           cohorts: u.cohorts ?? [],
+          thisweek: {
+            goal: (cw?.goal ?? '').slice(0, 200),
+            planned: plannedHere.length,
+            completed: plannedHere.filter((s) => s.completed).length,
+            plannedall: planItems(lid, db.currentWeek, cw).length,
+          },
         }
       }),
     }

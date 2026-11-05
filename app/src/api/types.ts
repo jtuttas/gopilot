@@ -128,6 +128,17 @@ export interface Biography {
   weeks: Week[]
 }
 
+export interface LerndokuThisWeek {
+  /** Weekly goal, max. 200 characters; empty = none. */
+  goal: string
+  /** Planned steps of this course in the current week. */
+  planned: number
+  /** Of those, completed now. */
+  completed: number
+  /** Planned steps of all courses in the current week. */
+  plannedall: number
+}
+
 export interface LerndokuLearner {
   userid: number
   fullname: string
@@ -137,6 +148,8 @@ export interface LerndokuLearner {
   unreadfeedback: number
   /** Visible cohorts (global groups, e.g. classes), sorted by name; empty = none. */
   cohorts: { id: number; name: string }[]
+  /** Current week: goal and planned steps of this course (plugin 0.5.0+; missing with older plugins). */
+  thisweek?: LerndokuThisWeek
 }
 
 export interface Lerndoku {

@@ -138,14 +138,15 @@ Als Lehrkraft eines Kurses sind Sie dort automatisch **Lerncoach**. Voraussetzun
 
 ## Lerndoku
 
-Die Lerndoku zeigt alle Lernenden eines Kurses mit Förder-Ampel, den vier Signalen, dem Kursfortschritt und der letzten Kursreflexion.
+Die Lerndoku zeigt alle Lernenden eines Kurses mit Förder-Ampel, Wochenplan und Wochenziel der laufenden Woche, den vier Signalen, dem Kursfortschritt und der letzten Kursreflexion.
 
 ![Lerndoku eines Kurses](img-app/b01-lerndoku.png)
 
 - **Sortierung:** Standardmäßig steht Rot oben, alternativ nach Name.
 - **Filter:** Über die Ampelfarben blenden Sie z. B. nur Lernende mit Rot ein. Über **Suche** finden Sie einzelne Namen.
 - **Klasse:** Sind die Lernenden in Moodle globalen Gruppen zugeordnet (z. B. ihrer Klasse), zeigt die Spalte **Klasse** diese Gruppen. Über das Auswahlfeld **Klasse** sehen Sie nur die Lernenden einer globalen Gruppe oder mit **Ohne globale Gruppe** alle, die keiner zugeordnet sind.
-- **Signale:** Fahren Sie mit der Maus über ein Signal, um die Begründung zu sehen, z. B. „Pfadrückstand: Gelb – 3 von 7 fälligen Lernschritten noch offen“.
+- **Diese Woche:** Über der Tabelle steht, wie viele Lernende in der laufenden Woche Lernschritte aus Ihrem Kurs geplant und ein Wochenziel gesetzt haben. Die Spalte **Diese Woche** zeigt je Person, wie viele Schritte aus Ihrem Kurs geplant und schon erledigt sind, und das Wochenziel. Über das Auswahlfeld **Diese Woche** sehen Sie z. B. nur Lernende **ohne Plan in diesem Kurs**.
+- **Signale:** Fahren Sie mit der Maus über ein Signal, um die Begründung zu sehen, z. B. „Pfadrückstand: Gelb – 3 von 7 fälligen Lernschritten noch offen“. Das Signal **Plan** bewertet die letzte abgeschlossene Woche, nicht die laufende; den Plan der laufenden Woche sehen Sie in der Spalte **Diese Woche**.
 - Ein Klick auf den Namen öffnet die Detailansicht.
 
 Die Ampel ist ein Gesprächsanlass, keine Bewertung, und fließt nicht in Noten ein. Lernende sehen nur ihre eigene Ampel.
