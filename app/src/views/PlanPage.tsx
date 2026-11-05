@@ -1,6 +1,7 @@
 import {
   Accordion,
   Badge,
+  Box,
   Button,
   Card,
   Checkbox,
@@ -21,23 +22,29 @@ import { errorMessage } from '../api/client'
 import { api } from '../api/functions'
 import { queryKeys, useOverview, useSavePlan, useWeek } from '../api/hooks'
 import type { PathsResponse, Week } from '../api/types'
+import { CourseHeading } from '../components/CourseHeading'
 import { Notice } from '../components/Notice'
 import { PageHeader } from '../components/PageHeader'
 import { ErrorAlert, Loading } from '../components/QueryState'
+import { courseColours, shortCourseName } from '../lib/courseColours'
 import { metaText, modLabel } from '../lib/format'
 import { addWeeks, formatDate, isMonday, relativeWeekLabel, weekTitle } from '../lib/week'
 
 interface EditorProps {
   week: Week
   paths: PathsResponse[]
+  colours: Map<number, string>
 }
 
-function PlanEditor({ week, paths }: EditorProps) {
+function PlanEditor({ week, paths, colours }: EditorProps) {
   const [goal, setGoal] = useState(week.goal)
   const [selected, setSelected] = useState<Set<number>>(() => new Set(week.items.map((s) => s.cmid)))
   const [showDone, setShowDone] = useState(false)
   const save = useSavePlan()
   const readOnly = week.closed
+
+  const countOf = (p: PathsResponse) =>
+    p.paths.reduce((n, x) => n + x.steps.filter((s) => selected.has(s.cmid)).length, 0)
 
   const toggle = (cmid: number, on: boolean) =>
     setSelected((prev) => {
@@ -87,13 +94,34 @@ function PlanEditor({ week, paths }: EditorProps) {
       </Group>
 
       {paths.map((p) => {
+        const color = colours.get(p.course.id) ?? 'blue'
+        const count = countOf(p)
         return (
-          <Card key={p.course.id} withBorder radius="md" padding="sm">
-            <Group justify="space-between" mb="xs" wrap="nowrap" gap="xs">
-              <Text fw={600} size="sm">
-                {p.course.fullname}
-              </Text>
-            </Group>
+          <Card
+            key={p.course.id}
+            withBorder
+            radius="md"
+            padding="sm"
+            style={{ borderLeft: `4px solid var(--mantine-color-${color}-6)` }}
+            component="section"
+            aria-label={`Kurs ${p.course.fullname}`}
+          >
+            <Box mb="sm">
+              <CourseHeading
+                name={p.course.fullname}
+                color={color}
+                right={
+                  <Badge
+                    color={color}
+                    variant={count > 0 ? 'filled' : 'light'}
+                    style={{ flexShrink: 0 }}
+                    styles={{ label: { textTransform: 'none' } }}
+                  >
+                    {count} ausgewählt
+                  </Badge>
+                }
+              />
+            </Box>
             <Accordion multiple variant="contained" radius="md" defaultValue={p.paths.filter((x) => x.completed < x.total).map((x) => String(x.sectionid))}>
               {p.paths.map((path) => {
                 const visible = path.steps.filter((s) => showDone || !s.completed || selected.has(s.cmid))
@@ -106,7 +134,7 @@ function PlanEditor({ week, paths }: EditorProps) {
                           {path.name}
                         </Text>
                         {count > 0 && (
-                          <Badge size="sm" circle aria-label={`${count} ausgewählt`}>
+                          <Badge size="sm" circle color={color} aria-label={`${count} ausgewählt`}>
                             {count}
                           </Badge>
                         )}
@@ -122,6 +150,7 @@ function PlanEditor({ week, paths }: EditorProps) {
                         {visible.map((s) => (
                           <Checkbox
                             key={s.cmid}
+                            color={color}
                             checked={selected.has(s.cmid)}
                             onChange={(e) => toggle(s.cmid, e.currentTarget.checked)}
                             disabled={readOnly}
@@ -162,9 +191,28 @@ function PlanEditor({ week, paths }: EditorProps) {
 
       <Card withBorder radius="md" padding="sm" pos="sticky" bottom="calc(var(--app-shell-footer-offset, 0px) + 8px)" style={{ zIndex: 5 }} shadow="sm">
         <Group justify="space-between" wrap="nowrap">
-          <Text size="sm">
-            {selected.size} {selected.size === 1 ? 'Lernschritt' : 'Lernschritte'} ausgewählt
-          </Text>
+          <Stack gap={4}>
+            <Text size="sm">
+              {selected.size} {selected.size === 1 ? 'Lernschritt' : 'Lernschritte'} ausgewählt
+            </Text>
+            {paths.length > 1 && (
+              <Group gap={4}>
+                {paths.map((p) => (
+                  <Badge
+                    key={p.course.id}
+                    size="xs"
+                    variant="light"
+                    color={colours.get(p.course.id) ?? 'blue'}
+                    styles={{ label: { textTransform: 'none' } }}
+                    maw={180}
+                    title={p.course.fullname}
+                  >
+                    {shortCourseName(p.course.fullname)}: {countOf(p)}
+                  </Badge>
+                ))}
+              </Group>
+            )}
+          </Stack>
           <Button leftSection={<IconDeviceFloppy size={16} />} onClick={submit} loading={save.isPending} disabled={readOnly}>
             Plan speichern
           </Button>
@@ -215,6 +263,7 @@ export function PlanPage() {
           key={week}
           week={weekQuery.data}
           paths={pathQueries.map((q) => q.data!).filter(Boolean)}
+          colours={courseColours(overview.data?.courses ?? [])}
         />
       )}
     </>

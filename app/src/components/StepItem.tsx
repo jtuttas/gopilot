@@ -37,11 +37,10 @@ interface StepItemProps {
   /** Allow ticking manual steps (learner, open week). */
   canTick?: boolean
   showMeta?: boolean
-  courseName?: string
 }
 
 /** One Lernschritt with status, Soll-Termin, metadata and Moodle link. */
-export function StepItem({ step, canTick = true, showMeta = true, courseName }: StepItemProps) {
+export function StepItem({ step, canTick = true, showMeta = true }: StepItemProps) {
   const completion = useStepCompletion()
   const tickable = canTick && step.manual
   const pending = completion.isPending
@@ -92,11 +91,6 @@ export function StepItem({ step, canTick = true, showMeta = true, courseName }: 
             · {modLabel(step.modname)} · {statusText}
           </Text>
         </Text>
-        {courseName && (
-          <Text size="xs" c="dimmed" truncate>
-            {courseName}
-          </Text>
-        )}
         <Group gap={6}>
           {step.expected > 0 && (
             <Badge

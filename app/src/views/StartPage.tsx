@@ -1,5 +1,6 @@
 import {
   Anchor,
+  Box,
   Button,
   Card,
   Divider,
@@ -15,6 +16,8 @@ import { Link } from 'react-router'
 import { useOverview, useWeek } from '../api/hooks'
 import type { Overview, OverviewCourse } from '../api/types'
 import { AmpelSummary } from '../components/Ampel'
+import { CourseHeading } from '../components/CourseHeading'
+import { courseColours } from '../lib/courseColours'
 import { Notice } from '../components/Notice'
 import { ErrorAlert, Loading } from '../components/QueryState'
 import { StepItem } from '../components/StepItem'
@@ -92,8 +95,17 @@ function Prompts({ overview }: { overview: Overview }) {
 
 function CurrentWeekCard({ overview }: { overview: Overview }) {
   const week = overview.week
-  const names = new Map(overview.courses.map((c) => [c.id, c.fullname]))
+  const colours = courseColours(overview.courses)
   const done = week.items.filter((s) => s.completed).length
+  // Group by course in overview order; items of unknown courses go last.
+  const groups = [...overview.courses, { id: -1, fullname: 'Weitere Lernschritte' }]
+    .map((c) => ({
+      course: c,
+      items: week.items.filter((s) =>
+        c.id === -1 ? !overview.courses.some((o) => o.id === s.courseid) : s.courseid === c.id,
+      ),
+    }))
+    .filter((g) => g.items.length > 0)
   return (
     <Card withBorder radius="md" padding="md">
       <Group justify="space-between" mb="xs" wrap="wrap">
@@ -123,10 +135,38 @@ function CurrentWeekCard({ overview }: { overview: Overview }) {
           <Text size="xs" c="dimmed" mb={4}>
             {done} von {week.items.length} geplanten Lernschritten erledigt
           </Text>
-          <Stack gap={0}>
-            {week.items.map((s) => (
-              <StepItem key={s.cmid} step={s} canTick={!week.closed} showMeta={false} courseName={names.get(s.courseid)} />
-            ))}
+          <Stack gap="sm">
+            {groups.map(({ course, items }) => {
+              const color = colours.get(course.id) ?? 'gray'
+              const groupDone = items.filter((s) => s.completed).length
+              return (
+                <Box
+                  key={course.id}
+                  component="section"
+                  aria-label={`Kurs ${course.fullname}`}
+                  pl="sm"
+                  pt={6}
+                  style={{ borderLeft: `4px solid var(--mantine-color-${color}-6)` }}
+                >
+                  <CourseHeading
+                    name={course.fullname}
+                    color={color}
+                    size="sm"
+                    as="p"
+                    right={
+                      <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+                        {groupDone}/{items.length} erledigt
+                      </Text>
+                    }
+                  />
+                  <Stack gap={0} mt={2}>
+                    {items.map((s) => (
+                      <StepItem key={s.cmid} step={s} canTick={!week.closed} showMeta={false} />
+                    ))}
+                  </Stack>
+                </Box>
+              )
+            })}
           </Stack>
         </>
       )}
@@ -134,13 +174,11 @@ function CurrentWeekCard({ overview }: { overview: Overview }) {
   )
 }
 
-function CourseCard({ course }: { course: OverviewCourse }) {
+function CourseCard({ course, color }: { course: OverviewCourse; color: string }) {
   return (
-    <Card withBorder radius="md" padding="md">
+    <Card withBorder radius="md" padding="md" style={{ borderLeft: `4px solid var(--mantine-color-${color}-6)` }}>
       <Stack gap="sm">
-        <Title order={4} size="sm">
-          {course.fullname}
-        </Title>
+        <CourseHeading name={course.fullname} color={color} size="sm" as="h4" />
         <CourseProgress {...course.progress} />
         <AmpelSummary ampel={course.ampel} audience="learner" />
         <Anchor component={Link} to={`/lernpfade/${course.id}`} size="sm">
@@ -160,6 +198,7 @@ export function StartPage() {
   const firstName = data.fullname.split(' ')[0]
   const learnCourses = data.courses.filter((c) => c.canuse)
   const coachCourses = data.courses.filter((c) => c.cancoach)
+  const colours = courseColours(data.courses)
 
   return (
     <Stack gap="md">
@@ -182,7 +221,7 @@ export function StartPage() {
           </Text>
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             {learnCourses.map((c) => (
-              <CourseCard key={c.id} course={c} />
+              <CourseCard key={c.id} course={c} color={colours.get(c.id) ?? 'blue'} />
             ))}
           </SimpleGrid>
         </>

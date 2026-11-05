@@ -34,7 +34,7 @@ Unten auf dem Handy findest du die Navigation: **Start**, **Lernpfade**, **Plan*
 
 ## Start: deine Woche auf einen Blick
 
-Die Startseite zeigt die laufende Kalenderwoche mit deinem Wochenziel und den geplanten Lernschritten.
+Die Startseite zeigt die laufende Kalenderwoche mit deinem Wochenziel und den geplanten Lernschritten. Die Lernschritte sind nach Kurs gruppiert: Jeder Kurs hat eine eigene Farbe, die du auch im Wochenplan und bei **Deine Kurse** wiederfindest.
 
 ![Startseite mit der aktuellen Woche](img-app/a02-start-woche.png)
 
@@ -75,8 +75,8 @@ Unter **Plan** legst du fest, was du dir für **diese** oder die **nächste Woch
 ![Wochenplan: Wochenziel](img-app/a06-wochenplan-ziel.png)
 
 1. **Wochenziel formulieren:** Was willst du in dieser Woche erreichen? Dein Wochenziel sehen alle deine Lehrkräfte.
-2. **Lernschritte auswählen:** Die Lernschritte sind nach Kurs und Lernpfad sortiert. Bereits erledigte Schritte sind ausgeblendet, über **Erledigte anzeigen** holst du sie zurück.
-3. **Plan speichern:** Die Leiste unten zeigt, wie viele Schritte du ausgewählt hast.
+2. **Lernschritte auswählen:** Jeder Kurs steht in einem eigenen Kasten mit Kursfarbe und Kursname, darin die Lernpfade. Oben rechts im Kasten siehst du, wie viele Schritte du aus diesem Kurs ausgewählt hast. Bereits erledigte Schritte sind ausgeblendet, über **Erledigte anzeigen** holst du sie zurück.
+3. **Plan speichern:** Die Leiste unten zeigt, wie viele Schritte du ausgewählt hast, bei mehreren Kursen auch je Kurs (z. B. „LF5: 2“).
 
 ![Wochenplan: Lernschritte auswählen](img-app/a07-wochenplan-auswahl.png)
 
