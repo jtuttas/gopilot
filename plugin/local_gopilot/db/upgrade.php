@@ -45,5 +45,15 @@ function xmldb_local_gopilot_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110401, 'local', 'gopilot');
     }
 
+    if ($oldversion < 2026110900) {
+        // Read receipts for feedback entries.
+        $table = new xmldb_table('local_gopilot_feedback');
+        $field = new xmldb_field('timeread', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timecreated');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2026110900, 'local', 'gopilot');
+    }
+
     return true;
 }

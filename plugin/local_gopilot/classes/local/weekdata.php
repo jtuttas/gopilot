@@ -258,7 +258,80 @@ class weekdata {
             'isteacher' => (int)$record->authorid !== $learnerid,
             'message' => (string)$record->message,
             'timecreated' => (int)$record->timecreated,
+            'timeread' => (int)($record->timeread ?? 0),
         ];
+    }
+
+    /**
+     * Unread feedback addressed to a learner, newest first.
+     *
+     * Entries written by others (coaches) in the learner's own weeks, restricted
+     * to courses in which the user is a learner.
+     *
+     * @param int $userid
+     * @return array list of newfeedback structures
+     */
+    public function unread_feedback(int $userid): array {
+        global $DB;
+        $courses = access::learner_courses($userid);
+        if (!$courses) {
+            return [];
+        }
+        [$insql, $params] = $DB->get_in_or_equal(array_keys($courses), SQL_PARAMS_NAMED);
+        $params['userid'] = $userid;
+        $params['author'] = $userid;
+        $sql = "SELECT f.*, w.week
+                  FROM {local_gopilot_feedback} f
+                  JOIN {local_gopilot_week} w ON w.id = f.weekid
+                 WHERE w.userid = :userid AND f.authorid <> :author AND f.timeread = 0 AND f.courseid $insql
+              ORDER BY f.timecreated DESC, f.id DESC";
+        $result = [];
+        foreach ($DB->get_records_sql($sql, $params) as $record) {
+            $course = $courses[$record->courseid];
+            $result[] = [
+                'id' => (int)$record->id,
+                'courseid' => (int)$record->courseid,
+                'coursename' => format_string($course->fullname, true, ['context' => \context_course::instance($course->id)]),
+                'week' => (string)$record->week,
+                'authorname' => $this->fullname((int)$record->authorid),
+                'message' => (string)$record->message,
+                'timecreated' => (int)$record->timecreated,
+            ];
+        }
+        return $result;
+    }
+
+    /**
+     * Mark feedback entries as read by the learner they are addressed to.
+     *
+     * Only unread entries in the user's own weeks written by someone else are
+     * changed; other ids are ignored.
+     *
+     * @param int $userid
+     * @param int[] $ids
+     * @return int number of entries marked
+     */
+    public function mark_feedback_read(int $userid, array $ids): int {
+        global $DB;
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if (!$ids) {
+            return 0;
+        }
+        [$insql, $params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED);
+        $params['userid'] = $userid;
+        $params['author'] = $userid;
+        $sql = "SELECT f.id
+                  FROM {local_gopilot_feedback} f
+                  JOIN {local_gopilot_week} w ON w.id = f.weekid
+                 WHERE f.id $insql AND w.userid = :userid AND f.authorid <> :author AND f.timeread = 0";
+        $own = $DB->get_fieldset_sql($sql, $params);
+        if (!$own) {
+            return 0;
+        }
+        [$insql, $params] = $DB->get_in_or_equal($own, SQL_PARAMS_NAMED);
+        $params['now'] = $this->now;
+        $DB->execute("UPDATE {local_gopilot_feedback} SET timeread = :now WHERE id $insql", $params);
+        return count($own);
     }
 
     /**

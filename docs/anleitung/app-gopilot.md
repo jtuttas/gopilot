@@ -40,6 +40,7 @@ Die Startseite zeigt die laufende Kalenderwoche mit deinem Wochenziel und den ge
 
 - **Abhaken:** Lernschritte, die du selbst als erledigt markieren darfst, hakst du direkt hier ab. Das landet auch in Moodle. Abgaben und Tests setzt Moodle automatisch auf erledigt, sobald die Bedingung erfüllt ist.
 - **In Moodle öffnen:** Das Pfeil-Symbol rechts öffnet die Aktivität in Moodle in einem neuen Tab. Du wirst dabei automatisch in Moodle angemeldet und musst dein Kennwort nicht noch einmal eingeben.
+- Hat dir eine Lehrkraft geschrieben, steht die Nachricht ganz oben, bis du sie gelesen hast (siehe [Coaching-Feedback](#coaching-feedback)).
 - Hast du noch nichts geplant, erscheint oben der Hinweis **Woche planen**. Ab Freitag erinnert dich GoPilot ans **Reflektieren**.
 
 Weiter unten stehen **Deine Kurse** mit Kursfortschritt und Förder-Ampel:
@@ -110,7 +111,7 @@ Unter jeder Kursreflexion steht der Gesprächsfaden mit deiner Lehrkraft. Antwor
 
 ![Coaching-Feedback mit Antwort](img-app/a10-feedback.png)
 
-Kommt neues Feedback, bekommst du eine Benachrichtigung, als Push oder in Moodle.
+Kommt neues Feedback, bekommst du eine Benachrichtigung, als Push oder in Moodle. Außerdem steht die Nachricht ganz oben auf der Startseite, bis du sie gelesen hast: Mit **Antworten** öffnest du die Reflexion der Woche mit dem Faden, mit **Gelesen** blendest du sie aus. Sobald du den Faden öffnest, gilt das Feedback ebenfalls als gelesen.
 
 ## Lernbiografie
 
@@ -160,7 +161,7 @@ Oben stehen Ampel und Signale, darunter die Wochen, neueste zuerst. Pro Woche se
 - **Wochenziel** und **allgemeine Reflexion**: kursübergreifend, nur zum Lesen. Alle Lehrkräfte der:des Lernenden sehen sie.
 - die **geplanten Lernschritte dieses Kurses** mit Stand und Soll-Termin.
 - **Kursreflexion** und **Selbsteinschätzung** pro Lernpfad.
-- den **Coaching-Feedback-Faden**. Unter **Coaching-Feedback schreiben** antworten Sie, die:der Lernende wird benachrichtigt und kann zurückschreiben.
+- den **Coaching-Feedback-Faden**. Unter **Coaching-Feedback schreiben** antworten Sie, die:der Lernende wird benachrichtigt und kann zurückschreiben. Die Nachricht erscheint bei der:dem Lernenden ganz oben auf der Startseite. Unter Ihrer Nachricht steht, ob sie schon gelesen wurde („Gelesen 05.11.2026, 10:30“ oder „Noch nicht gelesen“).
 
 Neue Reflexionen in Ihren Kursen meldet GoPilot Ihnen standardmäßig im Moodle-Benachrichtigungsbereich.
 

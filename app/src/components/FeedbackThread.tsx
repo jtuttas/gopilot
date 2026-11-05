@@ -1,8 +1,8 @@
 import { Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { IconSend } from '@tabler/icons-react'
-import { useState } from 'react'
-import { useAddFeedback } from '../api/hooks'
+import { useEffect, useRef, useState } from 'react'
+import { useAddFeedback, useMarkFeedbackRead } from '../api/hooks'
 import { errorMessage } from '../api/client'
 import type { FeedbackEntry } from '../api/types'
 import { formatDateTime } from '../lib/week'
@@ -22,6 +22,19 @@ interface Props {
 export function FeedbackThread({ entries, courseid, learnerid, week, viewer, readOnly }: Props) {
   const [message, setMessage] = useState('')
   const add = useAddFeedback()
+  const markRead = useMarkFeedbackRead()
+  const marked = useRef(new Set<number>())
+
+  // The learner sees the thread: the coach's new entries count as read.
+  const unread = viewer === 'learner' ? entries.filter((e) => e.isteacher && e.timeread === 0).map((e) => e.id) : []
+  const unreadKey = unread.join(',')
+  useEffect(() => {
+    const ids = unreadKey ? unreadKey.split(',').map(Number).filter((id) => !marked.current.has(id)) : []
+    if (ids.length === 0) return
+    ids.forEach((id) => marked.current.add(id))
+    markRead.mutate(ids)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutate is stable enough; run once per new id set
+  }, [unreadKey])
   const inputLabel = viewer === 'coach' ? 'Coaching-Feedback schreiben' : 'Antwort an deine Lehrkraft'
 
   const submit = () => {
@@ -67,6 +80,11 @@ export function FeedbackThread({ entries, courseid, learnerid, week, viewer, rea
             <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
               {e.message}
             </Text>
+            {viewer === 'coach' && e.isteacher && e.timeread !== undefined && (
+              <Text size="xs" c="dimmed" ta="right" mt={2}>
+                {e.timeread > 0 ? `Gelesen ${formatDateTime(e.timeread)}` : 'Noch nicht gelesen'}
+              </Text>
+            )}
           </Paper>
         ))
       )}

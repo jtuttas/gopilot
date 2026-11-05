@@ -53,6 +53,19 @@ export interface FeedbackEntry {
   isteacher: boolean
   message: string
   timecreated: number
+  /** When the addressee read it, 0 = unread (plugin 0.6.0+; missing with older plugins). */
+  timeread?: number
+}
+
+/** Unread coaching feedback for the learner's start page (get_overview.newfeedback). */
+export interface NewFeedback {
+  id: number
+  courseid: number
+  coursename: string
+  week: WeekString
+  authorname: string
+  message: string
+  timecreated: number
 }
 
 /** 0 = not set, 1 sicher, 2 geht so, 3 unsicher, 4 komme nicht klar. */
@@ -105,6 +118,8 @@ export interface Overview {
   currentweek: WeekString
   courses: OverviewCourse[]
   week: Week
+  /** Unread coaching feedback, newest first (plugin 0.6.0+; missing with older plugins). */
+  newfeedback?: NewFeedback[]
 }
 
 export interface Path {

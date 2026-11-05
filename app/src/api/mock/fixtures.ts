@@ -63,6 +63,8 @@ export interface MockFeedback {
   authorid: number
   message: string
   timecreated: number
+  /** When the addressee read it, 0 = unread. */
+  timeread: number
 }
 
 export interface MockDb {
@@ -272,16 +274,16 @@ export function createMockDb(today: Date = new Date()): MockDb {
     {
       id: 1, userid: ADA, courseid: LF5, week: W(-1), authorid: LENA,
       message: 'Sehr sauber abgeleitet! Schau dir für LS 5.2 gleich die JOINs an, das passt gut zu deinem Modell.',
-      timecreated: t(0, 8),
+      timecreated: t(0, 8), timeread: t(0, 9),
     },
     {
       id: 2, userid: ADA, courseid: LF5, week: W(-1), authorid: ADA,
-      message: 'Danke, mache ich diese Woche.', timecreated: t(0, 9),
+      message: 'Danke, mache ich diese Woche.', timecreated: t(0, 9), timeread: 0,
     },
     {
       id: 3, userid: BEN, courseid: LF5, week: W(-1), authorid: LENA,
       message: 'Gute Besserung! Wo genau hakt es bei den JOINs? Wir können am Donnerstag zusammen ein Beispiel durchgehen.',
-      timecreated: t(0, 8),
+      timecreated: t(0, 8), timeread: 0,
     },
   ]
 

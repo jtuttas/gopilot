@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query'
 import { api } from './functions'
 import type {
+  Overview,
   PathMetaItem,
   SaveCourseConfigParams,
   SaveReflectionParams,
@@ -123,6 +124,25 @@ export function useAddFeedback() {
       Promise.all([
         qc.invalidateQueries({ queryKey: queryKeys.week(v.week) }),
         qc.invalidateQueries({ queryKey: queryKeys.learner(v.courseid, v.userid) }),
+        qc.invalidateQueries({ queryKey: queryKeys.biography }),
+      ]),
+  })
+}
+
+/** The learner has seen coaching feedback: removes it from the start page right away. */
+export function useMarkFeedbackRead() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (ids: number[]) => api.markFeedbackRead(ids),
+    onMutate: (ids) => {
+      qc.setQueryData<Overview>(queryKeys.overview, (o) =>
+        o?.newfeedback ? { ...o, newfeedback: o.newfeedback.filter((f) => !ids.includes(f.id)) } : o,
+      )
+    },
+    onSettled: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: queryKeys.overview }),
+        qc.invalidateQueries({ queryKey: ['week'] }),
         qc.invalidateQueries({ queryKey: queryKeys.biography }),
       ]),
   })

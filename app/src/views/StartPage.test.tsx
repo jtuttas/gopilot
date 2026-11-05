@@ -1,4 +1,5 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderApp } from '../test/renderApp'
 
@@ -26,6 +27,25 @@ describe('Startseite', () => {
     expect(within(lf5).getAllByText('Hinweis, keine Bewertung').length).toBeGreaterThan(0)
     expect(within(lf5).getByText('2 von 2 geplanten Lernschritten erledigt (100 %)')).toBeInTheDocument()
     expect(within(lf5).getByText(/fälligen Lernschritte erledigt$/)).toBeInTheDocument()
+  })
+
+  it('zeigt neues Coaching-Feedback ganz oben, bis es gelesen ist', async () => {
+    const user = userEvent.setup()
+    renderApp('/', 12)
+    const card = (await screen.findByRole('heading', { name: 'Neue Nachricht von deiner Lehrkraft' })).closest(
+      '.mantine-Card-root',
+    ) as HTMLElement
+    expect(within(card).getByText(/Wo genau hakt es bei den JOINs/)).toBeInTheDocument()
+    expect(within(card).getByText(/Lena .* · LF5 .* · KW 44/)).toBeInTheDocument()
+    expect(within(card).getByRole('link', { name: 'Antworten' })).toHaveAttribute('href', '/reflexion/2026-10-26')
+    await user.click(within(card).getByRole('button', { name: 'Gelesen' }))
+    await waitFor(() => expect(screen.queryByRole('heading', { name: /Neue Nachricht/ })).toBeNull())
+  })
+
+  it('zeigt gelesenes Feedback nicht mehr auf der Startseite', async () => {
+    renderApp('/', 11)
+    await screen.findByRole('heading', { name: 'Hallo Ada!' })
+    expect(screen.queryByRole('heading', { name: /Neue Nachricht/ })).toBeNull()
   })
 
   it('zeigt Gelb und Rot unterstützend formuliert', async () => {

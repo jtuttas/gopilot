@@ -57,7 +57,7 @@ class provider implements
             'local_gopilot_planitem' => ['weekid', 'courseid', 'cmid', 'completedatclose'],
             'local_gopilot_coursereflection' => ['weekid', 'courseid', 'text', 'timemodified'],
             'local_gopilot_selfassessment' => ['weekid', 'courseid', 'sectionid', 'selflevel', 'remark'],
-            'local_gopilot_feedback' => ['weekid', 'courseid', 'authorid', 'message', 'timecreated'],
+            'local_gopilot_feedback' => ['weekid', 'courseid', 'authorid', 'message', 'timecreated', 'timeread'],
             'local_gopilot_ampel' => ['userid', 'courseid', 'colour', 'signals', 'timecomputed'],
             'local_gopilot_pushsub' => ['userid', 'endpoint', 'p256dh', 'auth', 'timecreated'],
         ];

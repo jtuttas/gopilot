@@ -75,6 +75,7 @@ $string['privacy:metadata:local_gopilot_feedback:authorid'] = 'Verfasser:in des 
 $string['privacy:metadata:local_gopilot_feedback:courseid'] = 'Kurs.';
 $string['privacy:metadata:local_gopilot_feedback:message'] = 'Nachricht.';
 $string['privacy:metadata:local_gopilot_feedback:timecreated'] = 'Zeitpunkt der Erstellung.';
+$string['privacy:metadata:local_gopilot_feedback:timeread'] = 'Zeitpunkt, zu dem der Eintrag gelesen wurde.';
 $string['privacy:metadata:local_gopilot_feedback:weekid'] = 'Planungswoche der:des Lernenden.';
 $string['privacy:metadata:local_gopilot_planitem'] = 'In einer Woche geplante Lernschritte.';
 $string['privacy:metadata:local_gopilot_planitem:cmid'] = 'Geplante Aktivität.';

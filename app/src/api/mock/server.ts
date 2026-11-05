@@ -195,6 +195,24 @@ function feedbackFor(userid: number, courseid: number, week: string): FeedbackEn
       isteacher: f.authorid !== f.userid,
       message: f.message,
       timecreated: f.timecreated,
+      timeread: f.timeread,
+    }))
+}
+
+/** Unread entries by others in the learner's own weeks, newest first (get_overview.newfeedback). */
+function newFeedbackFor(userid: number) {
+  return db.feedback
+    .filter((f) => f.userid === userid && f.authorid !== userid && f.timeread === 0)
+    .filter((f) => db.courses.some((c) => c.id === f.courseid && canUse(userid, c)))
+    .sort((a, b) => b.timecreated - a.timecreated || b.id - a.id)
+    .map((f) => ({
+      id: f.id,
+      courseid: f.courseid,
+      coursename: course(f.courseid).fullname,
+      week: f.week,
+      authorname: db.users.find((u) => u.id === f.authorid)?.fullname ?? '',
+      message: f.message,
+      timecreated: f.timecreated,
     }))
 }
 
@@ -408,6 +426,7 @@ const handlers: Record<string, Handler> = {
           ampel: canUse(userid, c) ? computeAmpel(userid, c) : noAmpel(c.id),
         })),
       week: buildWeek(userid, db.currentWeek),
+      newfeedback: newFeedbackFor(userid),
     }
   },
 
@@ -554,9 +573,23 @@ const handlers: Record<string, Handler> = {
     if (!own && !canCoach(userid, c)) throw new MockException('nopermissions', 'Keine Berechtigung')
     const message = str(p.message).trim()
     if (!message) throw new MockException('emptymessage', 'Die Nachricht ist leer.')
-    const entry = { id: db.nextId++, userid: learner, courseid: c.id, week, authorid: userid, message, timecreated: db.now() }
+    const entry = {
+      id: db.nextId++, userid: learner, courseid: c.id, week, authorid: userid, message, timecreated: db.now(), timeread: 0,
+    }
     db.feedback.push(entry)
     return feedbackFor(learner, c.id, week).find((f) => f.id === entry.id)
+  },
+
+  local_gopilot_mark_feedback_read: (userid, p) => {
+    const ids = list(p.ids).map(num)
+    let marked = 0
+    for (const f of db.feedback) {
+      if (ids.includes(f.id) && f.userid === userid && f.authorid !== userid && f.timeread === 0) {
+        f.timeread = db.now()
+        marked++
+      }
+    }
+    return { marked }
   },
 
   local_gopilot_get_courseconfig: (userid, p) => {

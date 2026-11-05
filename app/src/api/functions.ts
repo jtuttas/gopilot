@@ -58,6 +58,8 @@ export const api = {
   addFeedback: (courseid: number, userid: number, week: WeekString, message: string) =>
     call<FeedbackEntry>('local_gopilot_add_feedback', { courseid, userid, week, message }),
 
+  markFeedbackRead: (ids: number[]) => call<{ marked: number }>('local_gopilot_mark_feedback_read', { ids }),
+
   getCourseConfig: (courseid: number) =>
     call<CourseConfig>('local_gopilot_get_courseconfig', { courseid }),
 

@@ -11,10 +11,18 @@ import {
   Text,
   Title,
 } from '@mantine/core'
-import { IconCalendarPlus, IconClipboardList, IconMessageCircle, IconTarget } from '@tabler/icons-react'
+import {
+  IconCalendarPlus,
+  IconCheck,
+  IconClipboardList,
+  IconMessageCircle,
+  IconMessageReply,
+  IconMessages,
+  IconTarget,
+} from '@tabler/icons-react'
 import { Link } from 'react-router'
-import { useOverview, useWeek } from '../api/hooks'
-import type { Overview, OverviewCourse } from '../api/types'
+import { useMarkFeedbackRead, useOverview, useWeek } from '../api/hooks'
+import type { NewFeedback, Overview, OverviewCourse } from '../api/types'
 import { AmpelSummary } from '../components/Ampel'
 import { CourseHeading } from '../components/CourseHeading'
 import { courseColours } from '../lib/courseColours'
@@ -22,7 +30,7 @@ import { Notice } from '../components/Notice'
 import { ErrorAlert, Loading } from '../components/QueryState'
 import { StepItem } from '../components/StepItem'
 import { rolesOf } from '../layout/nav'
-import { addWeeks, weekdayIndex, weekTitle } from '../lib/week'
+import { addWeeks, formatDateTime, isoWeek, weekdayIndex, weekTitle } from '../lib/week'
 
 function percent(done: number, total: number) {
   return total > 0 ? Math.round((done / total) * 100) : 0
@@ -42,6 +50,66 @@ export function CourseProgress({ completed, total }: { completed: number; total:
       </Group>
       <Progress value={pct} size="sm" aria-label={`Kursfortschritt ${pct} Prozent`} />
     </Stack>
+  )
+}
+
+/** Unread coaching feedback, newest first: the first thing a learner sees. */
+function NewFeedbackCard({ entries, colours }: { entries: NewFeedback[]; colours: Map<number, string> }) {
+  const markRead = useMarkFeedbackRead()
+  if (entries.length === 0) return null
+  const title = entries.length === 1 ? 'Neue Nachricht von deiner Lehrkraft' : `${entries.length} neue Nachrichten von deinen Lehrkräften`
+  return (
+    <Card withBorder radius="md" padding="md" style={{ borderColor: 'var(--mantine-color-blue-5)', borderWidth: 2 }}>
+      <Group gap="xs" mb="sm" wrap="nowrap">
+        <IconMessages size={22} color="var(--mantine-color-blue-6)" aria-hidden style={{ flexShrink: 0 }} />
+        <Title order={3} size="h4">
+          {title}
+        </Title>
+      </Group>
+      <Stack gap="sm">
+        {entries.map((f) => (
+          <Box
+            key={f.id}
+            p="sm"
+            bg="var(--mantine-color-blue-light)"
+            style={{
+              borderRadius: 'var(--mantine-radius-md)',
+              borderLeft: `4px solid var(--mantine-color-${colours.get(f.courseid) ?? 'blue'}-6)`,
+            }}
+          >
+            <Group justify="space-between" gap="xs" wrap="wrap" mb={4}>
+              <Text size="xs" fw={600}>
+                {f.authorname} · {f.coursename} · KW {isoWeek(f.week).week}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {formatDateTime(f.timecreated)}
+              </Text>
+            </Group>
+            <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+              {f.message}
+            </Text>
+            <Group gap="xs" mt="xs">
+              <Button
+                component={Link}
+                to={`/reflexion/${f.week}`}
+                size="xs"
+                leftSection={<IconMessageReply size={14} />}
+              >
+                Antworten
+              </Button>
+              <Button
+                size="xs"
+                variant="default"
+                leftSection={<IconCheck size={14} />}
+                onClick={() => markRead.mutate([f.id])}
+              >
+                Gelesen
+              </Button>
+            </Group>
+          </Box>
+        ))}
+      </Stack>
+    </Card>
   )
 }
 
@@ -211,6 +279,7 @@ export function StartPage() {
 
       {roles.isLearner && (
         <>
+          <NewFeedbackCard entries={data.newfeedback ?? []} colours={colours} />
           <Prompts overview={data} />
           <CurrentWeekCard overview={data} />
           <Title order={3} size="h4">

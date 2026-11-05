@@ -105,6 +105,24 @@ class structures {
             'isteacher' => new external_value(PARAM_BOOL, 'Author is not the learner'),
             'message' => new external_value(PARAM_TEXT, 'Message'),
             'timecreated' => new external_value(PARAM_INT, 'Time created'),
+            'timeread' => new external_value(PARAM_INT, 'When the addressee read it, 0 = unread'),
+        ]);
+    }
+
+    /**
+     * Unread feedback entry for the start page.
+     *
+     * @return external_single_structure
+     */
+    public static function newfeedback(): external_single_structure {
+        return new external_single_structure([
+            'id' => new external_value(PARAM_INT, 'Entry id'),
+            'courseid' => new external_value(PARAM_INT, 'Course id'),
+            'coursename' => new external_value(PARAM_TEXT, 'Course full name'),
+            'week' => new external_value(PARAM_RAW, 'Monday of the week'),
+            'authorname' => new external_value(PARAM_TEXT, 'Author full name'),
+            'message' => new external_value(PARAM_TEXT, 'Message'),
+            'timecreated' => new external_value(PARAM_INT, 'Time created'),
         ]);
     }
 

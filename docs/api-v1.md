@@ -54,7 +54,7 @@ Nur sichtbare, für die Person verfügbare Kursmodule, ohne Textfelder (`label`)
 
 ### `feedbackentry`
 
-`id` int, `authorid` int, `authorname` string, `isteacher` bool (Autor:in ist nicht die:der Lernende), `message` string, `timecreated` int.
+`id` int, `authorid` int, `authorname` string, `isteacher` bool (Autor:in ist nicht die:der Lernende), `message` string, `timecreated` int, `timeread` int (seit Plugin 0.6.0: wann die:der Lernende einen Eintrag der Lehrkraft gelesen hat, `0` = ungelesen; bei Einträgen der:des Lernenden immer `0`).
 
 ### `selfassessment`
 
@@ -97,6 +97,7 @@ Rückgabe:
 | `currentweek` | string (Montag dieser Woche) |
 | `courses` | list: `id`, `shortname`, `fullname`, `canuse` bool, `cancoach` bool, `canconfigure` bool, `progress` (`completed` int, `total` int über alle Lernschritte mit Abschlussbedingung), `ampel` (`ampel`, nur sinnvoll bei `canuse`; sonst `colour` = `none`) |
 | `week` | `week` (aktuelle Woche) |
+| `newfeedback` | list: `id`, `courseid`, `coursename`, `week`, `authorname`, `message`, `timecreated`. Ungelesene Einträge von Lehrkräften in den eigenen Wochen, nur Kurse mit `use`, neueste zuerst (seit Plugin 0.6.0) |
 
 Alle Kurse, in denen die Person `use`, `coach` oder `configure` hat. Die Ampel wird beim Aufruf neu berechnet und gespeichert.
 
@@ -166,6 +167,12 @@ Wochenziel und allgemeine Reflexion sind für jeden Lerncoach eines Kurses der P
 Parameter: `courseid` int, `userid` int (die:der Lernende), `week` string, `message` string.
 
 Auch die:der Lernende selbst darf antworten (`use` im Kurs und `userid` = eigene ID), der Faden ist ein Gespräch. Benachrichtigt die jeweils andere Seite. Rückgabe: `feedbackentry`.
+
+### `local_gopilot_mark_feedback_read`
+
+Seit Plugin 0.6.0. Parameter: `ids` list of int (Feedback-Einträge).
+
+Setzt `timeread` für die Einträge, die in den eigenen Wochen der aufrufenden Person von jemand anderem geschrieben wurden und noch ungelesen sind; andere IDs werden ignoriert. Die App ruft das auf, wenn die:der Lernende einen Faden sieht oder auf der Startseite **Gelesen** wählt. Rückgabe: `marked` int (Anzahl markierter Einträge).
 
 ## Funktionen für Kurseinstellungen (Capability `local/gopilot:configure`)
 

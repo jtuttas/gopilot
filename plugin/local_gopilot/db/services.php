@@ -34,6 +34,7 @@ $gopilotfunctions = [
     'get_lerndoku' => ['Learners of a course with Ampel (coach)', 'read'],
     'get_learner' => ['Weeks of a learner in a course (coach)', 'read'],
     'add_feedback' => ['Add coaching feedback', 'write'],
+    'mark_feedback_read' => ['Mark own coaching feedback as read', 'write'],
     'get_courseconfig' => ['Course configuration', 'read'],
     'save_courseconfig' => ['Save course configuration', 'write'],
     'save_pathmeta' => ['Save path metadata', 'write'],

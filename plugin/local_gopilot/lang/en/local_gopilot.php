@@ -75,6 +75,7 @@ $string['privacy:metadata:local_gopilot_feedback:authorid'] = 'Author of the ent
 $string['privacy:metadata:local_gopilot_feedback:courseid'] = 'Course.';
 $string['privacy:metadata:local_gopilot_feedback:message'] = 'Message.';
 $string['privacy:metadata:local_gopilot_feedback:timecreated'] = 'Time created.';
+$string['privacy:metadata:local_gopilot_feedback:timeread'] = 'Time the entry was read.';
 $string['privacy:metadata:local_gopilot_feedback:weekid'] = 'Planning week of the learner.';
 $string['privacy:metadata:local_gopilot_planitem'] = 'Learning steps planned in a week.';
 $string['privacy:metadata:local_gopilot_planitem:cmid'] = 'Planned activity.';

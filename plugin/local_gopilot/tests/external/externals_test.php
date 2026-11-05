@@ -40,6 +40,7 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
  * @covers     \local_gopilot\external\get_lerndoku
  * @covers     \local_gopilot\external\get_learner
  * @covers     \local_gopilot\external\add_feedback
+ * @covers     \local_gopilot\external\mark_feedback_read
  * @covers     \local_gopilot\external\get_courseconfig
  * @covers     \local_gopilot\external\save_courseconfig
  * @covers     \local_gopilot\external\save_pathmeta
@@ -285,6 +286,46 @@ final class externals_test extends \externallib_advanced_testcase {
         $thread = $this->courseweek($get, $this->coursea->id)['feedback'];
         $this->assertSame(['Gut gemacht!', 'Danke'], array_column($thread, 'message'));
         $this->assertSame([], $this->courseweek($get, $this->courseb->id)['feedback']);
+    }
+
+    /**
+     * Unread coaching feedback appears on the learner's start page until marked as read.
+     */
+    public function test_new_feedback_and_read_receipt(): void {
+        $week = weeks::current();
+        $this->redirectMessages();
+
+        $this->setUser($this->teachera);
+        $entry = $this->call('add_feedback', [$this->coursea->id, $this->learner->id, $week, 'Gut gemacht!']);
+        $this->assertSame(0, $entry['timeread']);
+        $foreign = $this->call('add_feedback', [$this->coursea->id, $this->other->id, $week, 'Weiter so']);
+
+        $this->setUser($this->learner);
+        $own = $this->call('add_feedback', [$this->coursea->id, $this->learner->id, $week, 'Danke']);
+        $new = $this->call('get_overview')['newfeedback'];
+        $this->assertCount(1, $new, 'Own replies are not new feedback');
+        $this->assertSame($entry['id'], $new[0]['id']);
+        $this->assertEquals($this->coursea->id, $new[0]['courseid']);
+        $this->assertSame('LF5', $new[0]['coursename']);
+        $this->assertSame($week, $new[0]['week']);
+        $this->assertSame('Lena Lehrkraft', $new[0]['authorname']);
+        $this->assertSame('Gut gemacht!', $new[0]['message']);
+
+        // Foreign and own entries are ignored.
+        $result = $this->call('mark_feedback_read', [[$entry['id'], $foreign['id'], $own['id']]]);
+        $this->assertSame(1, $result['marked']);
+        $this->assertSame([], $this->call('get_overview')['newfeedback']);
+        $this->assertSame(0, $this->call('mark_feedback_read', [[$entry['id']]])['marked']);
+
+        // The coach sees the read receipt in the thread.
+        $this->setUser($this->teachera);
+        $weeks = $this->call('get_learner', [$this->coursea->id, $this->learner->id])['weeks'];
+        $thread = array_column($weeks[0]['feedback'], 'timeread', 'message');
+        $this->assertGreaterThan(0, $thread['Gut gemacht!']);
+        $this->assertSame(0, $thread['Danke']);
+
+        $this->setUser($this->other);
+        $this->assertSame('Weiter so', $this->call('get_overview')['newfeedback'][0]['message']);
     }
 
     /**
@@ -557,8 +598,8 @@ final class externals_test extends \externallib_advanced_testcase {
             [$service->id]
         );
         $expected = ['get_overview', 'get_paths', 'get_week', 'save_plan', 'save_reflection', 'get_biography',
-            'get_lerndoku', 'get_learner', 'add_feedback', 'get_courseconfig', 'save_courseconfig', 'save_pathmeta',
-            'get_push_config', 'register_push', 'unregister_push'];
+            'get_lerndoku', 'get_learner', 'add_feedback', 'mark_feedback_read', 'get_courseconfig', 'save_courseconfig',
+            'save_pathmeta', 'get_push_config', 'register_push', 'unregister_push'];
         foreach ($expected as $name) {
             $this->assertContains('local_gopilot_' . $name, $functions);
         }

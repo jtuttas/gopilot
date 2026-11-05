@@ -86,6 +86,7 @@ class get_overview extends external_api {
             'currentweek' => $current,
             'courses' => $courses,
             'week' => $data->week($USER->id, $current),
+            'newfeedback' => $data->unread_feedback((int)$USER->id),
         ];
     }
 
@@ -110,6 +111,10 @@ class get_overview extends external_api {
                 'ampel' => structures::ampel(),
             ])),
             'week' => structures::week(),
+            'newfeedback' => new external_multiple_structure(
+                structures::newfeedback(),
+                'Unread coaching feedback addressed to the user, newest first'
+            ),
         ]);
     }
 }
