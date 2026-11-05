@@ -9,6 +9,18 @@ Frontend für Moodle, das das selbstgesteuerte Lernen von Auszubildenden an beru
 - Anleitung zur App für Auszubildende und Lehrkräfte: [docs/anleitung/app-gopilot.md](docs/anleitung/app-gopilot.md) (auch als PDF)
 - Installation auf einem Moodle-System: [docs/installation.md](docs/installation.md) (auch als PDF)
 
+## Einblick
+
+**Lehrkraft: Lerndoku.** Alle Lernenden eines Kurses auf einen Blick, mit Förder-Ampel, Wochenplan, Wochenziel, Signalen und Fortschritt.
+
+![Lerndoku der Lehrkraft](docs/img/gopilot-lehrkraft.png)
+
+**Lernende: Startseite.** Der Plan der Woche mit den Lernschritten aus Moodle, darunter die eigenen Kurse mit Fortschritt und Ampel.
+
+<img src="docs/img/gopilot-lernende.png" alt="Startseite für Lernende" width="360">
+
+Die Namen in den Bildern sind erfunden.
+
 ## Aufbau
 
 ```
